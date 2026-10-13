@@ -75,38 +75,96 @@
         }
         .diac-btn:hover { background: #F3E5AB; border-color: #D4AF37; }
         .diac-btn:active { transform: scale(0.95); }
-        .poly-char {
-            font-family: "Noto Serif SC", serif;
-            font-size: 1.35rem;
-            line-height: 1.4;
-            padding: 2px 4px;
-            border-radius: 4px;
-            cursor: default;
-            transition: background 0.15s, color 0.15s;
+        /* Input-layer poly markers: color only — never change glyph metrics */
+        #inputHighlight .poly-char {
+            font: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+            padding: 0;
+            margin: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            cursor: pointer;
+            display: inline;
+            vertical-align: baseline;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
         }
-        .poly-char.is-poly {
+        #inputHighlight .poly-char.is-poly {
             color: #1d4ed8;
-            cursor: pointer;
-            border-bottom: 2px solid #93c5fd;
+            /* underline via shadow so width/height unchanged */
+            text-decoration: underline;
+            text-decoration-color: #93c5fd;
+            text-underline-offset: 2px;
         }
-        .poly-char.is-poly:hover { background: #dbeafe; }
-        .poly-char.is-alt {
+        #inputHighlight .poly-char.is-poly:hover {
+            background: rgba(219, 234, 254, 0.5);
+        }
+        #inputHighlight .poly-char.is-alt {
             color: #c2410c;
-            border-bottom: 2px solid #fb923c;
-            background: #fff7ed;
-            cursor: pointer;
+            text-decoration: underline;
+            text-decoration-color: #fb923c;
+            text-underline-offset: 2px;
         }
-        .poly-char.is-alt:hover { background: #ffedd5; }
+        #inputHighlight .poly-char.is-alt:hover {
+            background: rgba(255, 237, 213, 0.6);
+        }
     
-        .thai-syl.is-poly { color: #2563eb; }
+        .thai-syl.is-poly { color: #2563eb; cursor: pointer; }
+        #thaiOutput .thai-syl.is-poly:hover { background: rgba(219, 234, 254, 0.5); border-radius: 2px; }
+        #thaiOutput .thai-syl.is-alt:hover { background: rgba(255, 237, 213, 0.6); border-radius: 2px; }
         .thai-syl.is-alt { color: #ea580c; font-weight: 600; }
         .poly-popup-btn { font-size: 13px; padding: 4px 10px; border-radius: 6px; border: 1px solid #E5DDC8; background: #fff; cursor: pointer; }
         .poly-popup-btn:hover { background: #F3E5AB; }
         .poly-popup-btn.active { background: #ea580c; color: #fff; border-color: #c2410c; }
+        .poly-popup-btn .font-thai { font-family: "Noto Sans Thai", sans-serif; color: #8B0000; }
+        .poly-popup-btn.active .font-thai { color: #fff; }
     
         #inputHighlight { pointer-events: none; }
         #inputHighlight .poly-char { pointer-events: auto; cursor: pointer; }
         #caretMirror { position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: none; white-space: pre-wrap; word-wrap: break-word; overflow: hidden; }
+    
+        #pinyinInput, #inputHighlight {
+            font-family: "Noto Serif SC", "Plus Jakarta Sans", "Noto Sans Thai", sans-serif;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            letter-spacing: 0;
+            word-spacing: 0;
+            tab-size: 4;
+            padding: 1rem !important;
+            margin: 0 !important;
+            border: 0 !important;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal;
+        }
+        #inputHighlight {
+            color: #1f2937;
+        }
+        #inputHighlight span {
+            font: inherit;
+            line-height: inherit;
+            letter-spacing: inherit;
+        }
+        #thaiSrcTip {
+            position: absolute;
+            z-index: 30;
+            pointer-events: none;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.12s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        #thaiSrcTip.show { opacity: 1; }
     </style>
 </head>
 <body class="min-h-screen text-china-ink font-sans flex flex-col justify-between selection:bg-china-gold selection:text-china-darkred">
@@ -284,8 +342,8 @@
                     </label>
                     <button id="clearBtn" class="text-xs text-gray-400 hover:text-china-red transition-colors px-2 py-1 rounded hover:bg-red-50"><span data-i18n="clearAll">ล้าง</span></button>
                 </div>
-                <div class="p-4 flex-grow flex flex-col relative">
-                    <div id="inputHighlight" class="absolute inset-4 overflow-hidden text-lg leading-relaxed font-sans whitespace-pre-wrap break-words pointer-events-none text-gray-800" aria-hidden="true"></div>
+                <div class="flex-grow flex flex-col relative" id="inputWrap">
+                    <div id="inputHighlight" class="absolute inset-0 overflow-hidden text-lg leading-relaxed font-sans whitespace-pre-wrap break-words pointer-events-none text-gray-800" aria-hidden="true"></div>
                     <textarea id="pinyinInput" class="relative w-full h-full resize-none border-0 focus:ring-0 text-lg text-transparent caret-china-darkred placeholder-gray-300 font-sans custom-scrollbar bg-transparent focus:outline-none"
                         placeholder="中国 / zhōngguó / ㄓㄨㄥㄍㄨㄛ" data-i18n-placeholder="inputPlaceholder" autofocus spellcheck="false"></textarea>
                     <div id="polyPopup" class="hidden absolute z-20 bg-white border border-china-border rounded-lg shadow-lg p-2 flex flex-wrap gap-1 max-w-xs"></div>
@@ -308,7 +366,8 @@
                     </button>
                 </div>
                 <div class="p-4 flex-grow flex flex-col bg-amber-50/20 relative">
-                    <div id="thaiOutput" class="w-full h-full overflow-y-auto text-xl leading-relaxed text-china-darkred font-thai custom-scrollbar break-words whitespace-pre-wrap select-text cursor-text" style="user-select: text; -webkit-user-select: text;"></div>
+                    <div id="thaiSrcTip"></div>
+                    <div id="thaiOutput" tabindex="0" class="w-full h-full overflow-y-auto outline-none text-xl leading-relaxed text-china-darkred font-thai custom-scrollbar break-words whitespace-pre-wrap select-text cursor-text" style="user-select: text; -webkit-user-select: text;"></div>
                     <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 pointer-events-none">
                         <svg class="w-16 h-16 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
                         <p class="text-sm"><span data-i18n="emptyResult">ผลลัพธ์จะแสดงที่นี่</span></p>
@@ -331,11 +390,11 @@
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">zh ch sh r</span> → จ ช ช ร</div>
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">z c s</span> → จ ช ซ</div>
             </div>
-            <p class="mt-3 text-[11px] text-gray-500 leading-relaxed">
-                ※ <b>중자음</b>(ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้<br>
-                ※ <b>중자음 외</b>: ˉ→저자음, ˊ→고자음, ˇ→고자음+่, ˋ→저자음+่<br>
-                ※ 공백 없는 연속 병음 자동 음절 분리 · NFD 다이어크리틱 정규화 지원
-            </p>
+            <div class="mt-3 text-[11px] text-gray-500 leading-relaxed space-y-0.5">
+                <p data-i18n="ruleLine1">※ Mid-class (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้</p>
+                <p data-i18n="ruleLine2">※ Other classes: ˉ→low, ˊ→high, ˇ→high+่, ˋ→low+่</p>
+                <p data-i18n="ruleLine3">※ Continuous pinyin auto-syllable split · NFD diacritic normalization</p>
+            </div>
         </div>
     </main>
 
@@ -922,6 +981,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       emptyResult: 'ผลลัพธ์จะแสดงที่นี่',
       ruleApplied: 'ใช้กฎการถอดเสียงไทย',
       ruleSummary: 'สรุปกฎการแปลง',
+      ruleLine1: '※ พยัญชนะกลาง (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
+      ruleLine2: '※ นอกกลุ่มกลาง: ˉ→ต่ำ, ˊ→สูง, ˇ→สูง+่, ˋ→ต่ำ+่',
+      ruleLine3: '※ แยกพยางค์พินอินต่อเนื่องอัตโนมัติ · รองรับ NFD',
       inputPlaceholder: 'พิมพ์จีน พินอิน หรือจู้อิน...\nเช่น 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: 'พร้อม',
       statusConverting: 'กำลังแปลง...',
@@ -953,6 +1015,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       emptyResult: '转换结果将显示在这里',
       ruleApplied: '已应用泰文转写规则',
       ruleSummary: '转换规则摘要',
+      ruleLine1: '※ 中辅音 (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
+      ruleLine2: '※ 非中辅音: ˉ→低辅音, ˊ→高辅音, ˇ→高辅音+่, ˋ→低辅音+่',
+      ruleLine3: '※ 连续拼音自动分音节 · 支持 NFD 变音符号规范化',
       inputPlaceholder: '输入汉字、拼音或注音...\n例：你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '就绪',
       statusConverting: '转换中...',
@@ -984,6 +1049,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       emptyResult: '轉換結果將顯示在這裡',
       ruleApplied: '已套用泰文轉寫規則',
       ruleSummary: '轉換規則摘要',
+      ruleLine1: '※ 中輔音 (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
+      ruleLine2: '※ 非中輔音: ˉ→低輔音, ˊ→高輔音, ˇ→高輔音+่, ˋ→低輔音+่',
+      ruleLine3: '※ 連續拼音自動分音節 · 支援 NFD 變音符號正規化',
       inputPlaceholder: '輸入漢字、拼音或注音...\n例：你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '就緒',
       statusConverting: '轉換中...',
@@ -1015,6 +1083,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       emptyResult: '변환 결과가 여기에 표시됩니다',
       ruleApplied: '태국어 표기 규칙 적용',
       ruleSummary: '변환 규칙 요약',
+      ruleLine1: '※ 중자음(ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
+      ruleLine2: '※ 중자음 외: ˉ→저자음, ˊ→고자음, ˇ→고자음+่, ˋ→저자음+่',
+      ruleLine3: '※ 공백 없는 연속 병음 자동 음절 분리 · NFD 다이어크리틱 정규화 지원',
       inputPlaceholder: '한자·병음·주음을 입력하세요...\n예: 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '대기 중',
       statusConverting: '변환 중...',
@@ -1046,6 +1117,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       emptyResult: 'Result appears here',
       ruleApplied: 'Thai transcription rules applied',
       ruleSummary: 'Rule summary',
+      ruleLine1: '※ Mid-class (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
+      ruleLine2: '※ Other classes: ˉ→low, ˊ→high, ˇ→high+่, ˋ→low+่',
+      ruleLine3: '※ Continuous pinyin auto-syllable split · NFD diacritic normalization',
       inputPlaceholder: 'Enter Chinese, Pinyin, or Zhuyin...\ne.g. 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: 'Ready',
       statusConverting: 'Converting...',
@@ -1153,20 +1227,19 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       for (let i = 0; i < text.length; i++) {
         const ch = text[i];
         if (ch === '\n') { html += '<br>'; continue; }
-        if (ch === ' ') { html += ' '; continue; }
+        const esc = ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : ch === '&' ? '&amp;' : ch;
         const readings = getReadings(ch);
         if (readings && readings.length > 1) {
           const isAlt = (polyOverrides[ch] || 0) > 0;
           const cls = isAlt ? 'poly-char is-poly is-alt' : 'poly-char is-poly';
           const title = readings.map(formatReading).join(' / ');
-          html += '<span class="' + cls + '" data-poly-ch="' + ch + '" data-poly-idx="' + i + '" title="' + title + '">' + ch + '</span>';
+          html += '<span class="' + cls + '" data-poly-ch="' + ch + '" data-poly-idx="' + i + '" title="' + title + '">' + esc + '</span>';
         } else {
-          // escape HTML
-          html += ch === '<' ? '&lt;' : ch === '>' ? '&gt;' : ch === '&' ? '&amp;' : ch;
+          // wrap every glyph the same way so metrics stay uniform
+          html += '<span class="poly-char">' + esc + '</span>';
         }
       }
       inputHighlight.innerHTML = html || '';
-      // bind click on poly chars via event delegation once
     }
 
     if (inputHighlight && !inputHighlight._polyBound) {
@@ -1248,44 +1321,52 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       polyPopupState = { ch, idx: cur, readings, charIndex };
       renderPolyPopupList();
 
-      const parent = pinyinInput.parentElement;
-      const parentRect = parent.getBoundingClientRect();
-      let left, top;
+      // Use fixed positioning so popup works for both input and output anchors
+      polyPopup.style.position = 'fixed';
+      polyPopup.style.zIndex = '100';
+      polyPopup.classList.remove('hidden');
 
+      let left, top;
       if (anchorRect) {
-        left = anchorRect.left - parentRect.left;
-        top = anchorRect.bottom - parentRect.top + 4;
-      } else if (typeof charIndex === 'number' && charIndex >= 0) {
+        left = anchorRect.left;
+        top = anchorRect.bottom + 4;
+      } else if (typeof charIndex === 'number' && charIndex >= 0 && pinyinInput) {
         const off = getCharOffsetInTextarea(charIndex);
-        left = off.left;
-        top = off.top + off.height + 4;
+        const parentRect = pinyinInput.parentElement.getBoundingClientRect();
+        left = parentRect.left + off.left;
+        top = parentRect.top + off.top + off.height + 4;
       } else {
-        left = 8;
-        top = 32;
+        left = 16;
+        top = 80;
       }
 
-      // Keep popup inside parent
-      polyPopup.classList.remove('hidden');
-      // Measure after visible
       const pw = polyPopup.offsetWidth || 120;
-      const ph = polyPopup.offsetHeight || 80;
-      const maxL = Math.max(4, parent.clientWidth - pw - 4);
-      const maxT = Math.max(4, parent.clientHeight - ph - 4);
-      polyPopup.style.left = Math.min(Math.max(4, left), maxL) + 'px';
-      polyPopup.style.top = Math.min(Math.max(4, top), maxT) + 'px';
+      const maxL = window.innerWidth - pw - 8;
+      // Vertical position is fixed relative to the character (always below).
+      // Do not flip above/below — only clamp horizontally.
+      polyPopup.style.left = Math.min(Math.max(8, left), maxL) + 'px';
+      polyPopup.style.top = Math.max(8, top) + 'px';
     }
 
     function renderPolyPopupList() {
       const { ch, idx, readings } = polyPopupState;
       if (!ch) return;
       polyPopup.innerHTML = '';
-      polyPopup.className = 'absolute z-20 bg-white border border-china-border rounded-lg shadow-lg p-2 flex flex-col gap-1 min-w-[7rem]';
+      polyPopup.className = 'z-50 bg-white border border-china-border rounded-lg shadow-lg p-2 flex flex-col gap-1 min-w-[9rem]';
+      polyPopup.style.position = 'fixed';
       readings.forEach((py, i) => {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'poly-popup-btn text-left w-full' + (i === idx ? ' active' : '');
+        b.className = 'poly-popup-btn text-left w-full flex items-center justify-between gap-3' + (i === idx ? ' active' : '');
         const label = formatReading(py);
-        b.innerHTML = '<span class="text-gray-400 mr-1.5">' + (i + 1) + '.</span>' + label;
+        let thaiPreview = '';
+        try { thaiPreview = convertPinyinToThai(py); } catch (_) { thaiPreview = ''; }
+        b.innerHTML =
+          '<span class="flex items-center gap-1.5 min-w-0">' +
+            '<span class="text-gray-400 tabular-nums w-4 shrink-0">' + (i + 1) + '.</span>' +
+            '<span class="truncate">' + label + '</span>' +
+          '</span>' +
+          '<span class="font-thai text-sm opacity-90 shrink-0">' + (thaiPreview || '') + '</span>';
         b.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -1299,11 +1380,20 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       if (!polyPopupState.ch) return;
       const { ch, readings } = polyPopupState;
       if (i < 0 || i >= readings.length) return;
+      const active = document.activeElement;
       polyOverrides[ch] = i;
       polyPopupState.idx = i;
       polyPopup.classList.add('hidden');
       polyPopupState.ch = null;
       handleInput();
+      // Keep focus where it was (output selection should not jump to input)
+      try {
+        if (active && active !== pinyinInput && typeof active.focus === 'function') {
+          active.focus();
+        } else if (thaiOutput) {
+          thaiOutput.focus();
+        }
+      } catch (_) {}
     }
 
     function onPolyPopupKey(e) {
@@ -1405,10 +1495,12 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       }
       let html = '';
       let plain = '';
+      let charIndex = 0;
       for (const ch of inputText) {
         if (ch === '\n') {
           html += '<br>';
           plain += '\n';
+          charIndex++;
           continue;
         }
         const readings = getReadings(ch);
@@ -1421,29 +1513,21 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
             const isAlt = idx > 0;
             const cls = isAlt ? 'thai-syl is-poly is-alt' : 'thai-syl is-poly';
             const tip = ch + ' ' + formatReading(py);
-            html += '<span class="' + cls + '" data-src="' + ch + '" title="' + tip + '">' + thai + '</span>';
+            html += '<span class="' + cls + '" data-src="' + ch + '" data-poly-ch="' + ch + '" data-poly-idx="' + charIndex + '" title="' + tip + '">' + thai + '</span>';
           } else {
             html += '<span class="thai-syl" data-src="' + ch + '" title="' + ch + '">' + thai + '</span>';
           }
         } else if (/[\u4e00-\u9fff]/.test(ch)) {
-          // unknown hanzi
           html += escapeHtml(ch);
           plain += ch;
         } else {
-          // pinyin / other: convert whole remaining is hard per-char; accumulate
-          // fallback: just append as we go for non-hanzi runs later
           html += escapeHtml(ch);
           plain += ch;
         }
+        charIndex++;
       }
-      // If input has no hanzi, plain convert
-      if (![...inputText].some(c => getReadings(c))) {
-        const full = convertPinyinToThai(inputText);
-        return { html: escapeHtml(full), plain: full };
-      }
-      // If mixed with pinyin letters, re-convert full for plain accuracy on non-hanzi parts
       const hasLatin = /[a-züêv]/i.test(inputText);
-      if (hasLatin) {
+      if (hasLatin || ![...inputText].some(c => getReadings(c))) {
         const full = convertPinyinToThai(inputText);
         return { html: escapeHtml(full), plain: full };
       }
@@ -1452,6 +1536,60 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
     function escapeHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+
+    const thaiSrcTip = document.getElementById('thaiSrcTip');
+    let tipTimer = null;
+    if (thaiOutput && thaiSrcTip) {
+      thaiOutput.addEventListener('mouseover', (e) => {
+        const span = e.target.closest('.thai-syl[data-src]');
+        if (!span) return;
+        clearTimeout(tipTimer);
+        tipTimer = setTimeout(() => {
+          const src = span.getAttribute('data-src') || '';
+          const tip = span.getAttribute('title') || src;
+          thaiSrcTip.textContent = tip;
+          thaiSrcTip.classList.add('show');
+          const outRect = thaiOutput.parentElement.getBoundingClientRect();
+          const r = span.getBoundingClientRect();
+          let left = r.left - outRect.left + r.width / 2 - thaiSrcTip.offsetWidth / 2;
+          let top = r.top - outRect.top - thaiSrcTip.offsetHeight - 6;
+          if (top < 0) top = r.bottom - outRect.top + 6;
+          left = Math.max(4, Math.min(left, outRect.width - thaiSrcTip.offsetWidth - 4));
+          thaiSrcTip.style.left = left + 'px';
+          thaiSrcTip.style.top = top + 'px';
+        }, 400);
+      });
+      thaiOutput.addEventListener('mouseout', (e) => {
+        if (e.target.closest('.thai-syl')) {
+          clearTimeout(tipTimer);
+          thaiSrcTip.classList.remove('show');
+        }
+      });
+      thaiOutput.addEventListener('scroll', () => {
+        thaiSrcTip.classList.remove('show');
+      });
+
+      // Click polyphone Thai syllable → same numbered picker (stay on output, no focus jump)
+      thaiOutput.addEventListener('click', (e) => {
+        const span = e.target.closest('.thai-syl.is-poly[data-poly-ch]');
+        if (!span) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (thaiSrcTip) thaiSrcTip.classList.remove('show');
+        const ch = span.getAttribute('data-poly-ch');
+        const idx = parseInt(span.getAttribute('data-poly-idx') || '0', 10);
+        showPolyPopupForChar(ch, idx, span.getBoundingClientRect());
+        // Mark selection in input highlight only (no focus steal)
+        if (pinyinInput && idx >= 0 && idx <= pinyinInput.value.length) {
+          try {
+            const prev = document.activeElement;
+            pinyinInput.setSelectionRange(idx, idx + 1);
+            if (prev && prev !== pinyinInput && typeof prev.focus === 'function') prev.focus();
+          } catch (_) {}
+        }
+      });
     }
 
     function handleInput() {

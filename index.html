@@ -116,7 +116,7 @@
         #thaiOutput .thai-syl.is-poly:hover { background: rgba(219, 234, 254, 0.5); border-radius: 2px; }
         #thaiOutput .thai-syl.is-alt:hover { background: rgba(255, 237, 213, 0.6); border-radius: 2px; }
         .thai-syl.is-alt { color: #ea580c; font-weight: 600; }
-        .poly-popup-btn { font-size: 13px; padding: 4px 10px; border-radius: 6px; border: 1px solid #E5DDC8; background: #fff; cursor: pointer; }
+        .poly-popup-btn { font-size: 13px; padding: 6px 12px; min-height: 2.25rem; border-radius: 8px; border: 1px solid #E5DDC8; background: #fff; cursor: pointer; box-sizing: border-box; }
         .poly-popup-btn:hover { background: #F3E5AB; }
         .poly-popup-btn.active { background: #ea580c; color: #fff; border-color: #c2410c; }
         .poly-popup-btn .font-thai { font-family: "Noto Sans Thai", sans-serif; color: #8B0000; }
@@ -342,7 +342,7 @@
                     </label>
                     <button id="clearBtn" class="text-xs text-gray-400 hover:text-china-red transition-colors px-2 py-1 rounded hover:bg-red-50"><span data-i18n="clearAll">ล้าง</span></button>
                 </div>
-                <div class="flex-grow flex flex-col relative" id="inputWrap">
+                <div class="flex-grow flex flex-col relative" id="inputWrap" style="min-height:0">
                     <div id="inputHighlight" class="absolute inset-0 overflow-hidden text-lg leading-relaxed font-sans whitespace-pre-wrap break-words pointer-events-none text-gray-800" aria-hidden="true"></div>
                     <textarea id="pinyinInput" class="relative w-full h-full resize-none border-0 focus:ring-0 text-lg text-transparent caret-china-darkred placeholder-gray-300 font-sans custom-scrollbar bg-transparent focus:outline-none"
                         placeholder="中国 / zhōngguó / ㄓㄨㄥㄍㄨㄛ" data-i18n-placeholder="inputPlaceholder" autofocus spellcheck="false"></textarea>
@@ -365,9 +365,9 @@
                         <span data-i18n="copyBtn">คัดลอก</span>
                     </button>
                 </div>
-                <div class="p-4 flex-grow flex flex-col bg-amber-50/20 relative">
+                <div class="p-4 flex-grow flex flex-col bg-amber-50/20 relative min-h-0 overflow-hidden">
                     <div id="thaiSrcTip"></div>
-                    <div id="thaiOutput" tabindex="0" class="w-full h-full overflow-y-auto outline-none text-xl leading-relaxed text-china-darkred font-thai custom-scrollbar break-words whitespace-pre-wrap select-text cursor-text" style="user-select: text; -webkit-user-select: text;"></div>
+                    <div id="thaiOutput" tabindex="0" class="w-full h-full min-h-0 overflow-y-auto overflow-x-hidden outline-none text-xl leading-relaxed text-china-darkred font-thai custom-scrollbar break-words whitespace-pre-wrap select-text cursor-text" style="user-select: text; -webkit-user-select: text;"></div>
                     <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-gray-300 pointer-events-none">
                         <svg class="w-16 h-16 mb-2 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path></svg>
                         <p class="text-sm"><span data-i18n="emptyResult">ผลลัพธ์จะแสดงที่นี่</span></p>
@@ -382,13 +382,21 @@
 
         <div class="mt-8 bg-white/60 backdrop-blur-sm rounded-xl p-5 border border-china-border text-xs text-gray-600">
             <h3 class="font-bold text-china-darkred mb-2 text-sm flex items-center gap-1.5"><span>🏮</span> <span data-i18n="ruleSummary">สรุปกฎการแปลง</span></h3>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-2">
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-2 rule-map-set" data-for-lang="default">
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">b p m f</span> → ป พ/ผ ม ฟ</div>
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">d t n l</span> → ต ท/ถ น ล</div>
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">g k h</span> → ก ค/ข ฮ</div>
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">j q x</span> → จ ช/ฉ ซ</div>
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">zh ch sh r</span> → จ ช ช ร</div>
                 <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">z c s</span> → จ ช ซ</div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-2 rule-map-set hidden" data-for-lang="zh-Hant">
+                <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">ㄅ ㄆ ㄇ ㄈ</span> → ป พ/ผ ม ฟ</div>
+                <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">ㄉ ㄊ ㄋ ㄌ</span> → ต ท/ถ น ล</div>
+                <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">ㄍ ㄎ ㄏ</span> → ก ค/ข ฮ</div>
+                <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">ㄐ ㄑ ㄒ</span> → จ ช/ฉ ซ</div>
+                <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">ㄓ ㄔ ㄕ ㄖ</span> → จ ช ช ร</div>
+                <div class="bg-white p-2 rounded border border-stone-200"><span class="font-semibold text-china-red">ㄗ ㄘ ㄙ</span> → จ ช ซ</div>
             </div>
             <div class="mt-3 text-[11px] text-gray-500 leading-relaxed space-y-0.5">
                 <p data-i18n="ruleLine1">※ Mid-class (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้</p>
@@ -665,16 +673,24 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       const isUe  = /เ/.test(result) && /ว/.test(result) && !/ย/.test(result);
       const isUan = /เ/.test(result) && /วียน/.test(result);
       if (isUe) {
+        // tone after ฺ cluster: ฺเหฺว + tone
         result = baseCons + 'ฺเหฺว' + toneMark;
       } else if (isUan) {
         result = baseCons + 'ฺเหวี' + toneMark + 'ยน';
       } else if (/[ยว]/.test(result)) {
+        // strip leading ห from cluster; put ฺห after ย/ว, tone after ฺห
         result = result.replace(new RegExp('ห(' + baseCons + ')([่้๊๋]?)'), '$1$2');
         result = result.replace(/([ยว])([่้๊๋]?)/, '$1ฺห$2');
       }
     }
 
     result = result.replace(/[()]/g, '').replace(/\./g, '');
+
+    // Tone marks must come AFTER phinthu ฺ (never before)
+    // e.g. ฺ่ → ฺ่ , ลฺ่ห → ลฺห่
+    result = result.replace(/([่้๊๋]+)(ฺ+)/g, '$2$1');
+    result = result.replace(/([ก-ฮ])([่้๊๋]+)(ฺ+)([ก-ฮห]?)/g, '$1$3$4$2');
+
     return result;
   }
 
@@ -1153,7 +1169,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       if (t[key] != null) el.setAttribute('title', t[key]);
     });
     if (t.pageTitle) document.title = t.pageTitle;
-    document.querySelectorAll('.example-set').forEach(el => {
+    document.querySelectorAll('.example-set, .rule-map-set').forEach(el => {
       const forLang = el.getAttribute('data-for-lang');
       if (forLang === 'zh-Hant') el.classList.toggle('hidden', lang !== 'zh-Hant');
       else el.classList.toggle('hidden', lang === 'zh-Hant');
@@ -1220,6 +1236,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
     const inputHighlight = document.getElementById('inputHighlight');
     const polyPopup = document.getElementById('polyPopup');
+    let lastPlainThai = '';
 
     function updateInputHighlight(text) {
       if (!inputHighlight) return;
@@ -1250,6 +1267,40 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
 
     let polyPopupState = { ch: null, idx: 0, readings: [] };
+
+    function closePolyPopup() {
+      if (polyPopup) polyPopup.classList.add('hidden');
+      polyPopupState.ch = null;
+      polyPopupState.charIndex = null;
+      polyPopupState.lockedLeft = null;
+      polyPopupState.lockedTop = null;
+    }
+
+    /** Close popup if the target character was deleted or changed */
+    function syncPolyPopupWithText(text) {
+      if (!polyPopupState.ch || !polyPopup || polyPopup.classList.contains('hidden')) return;
+      const idx = polyPopupState.charIndex;
+      const ch = polyPopupState.ch;
+      if (idx == null || idx < 0 || idx >= text.length || text[idx] !== ch) {
+        // character gone or replaced — also check if ch still exists elsewhere
+        if (!text.includes(ch)) {
+          closePolyPopup();
+          return;
+        }
+        // same char still in text but index shifted — update index or close
+        const newIdx = text.indexOf(ch);
+        if (newIdx < 0) {
+          closePolyPopup();
+          return;
+        }
+        polyPopupState.charIndex = newIdx;
+        placePolyPopupUnderAnchor();
+        return;
+      }
+      // still present at same index — keep, just re-anchor
+      placePolyPopupUnderAnchor();
+    }
+
 
     function getCharOffsetInTextarea(charIndex) {
       // Mirror the textarea to measure the pixel position of a character
@@ -1309,7 +1360,72 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       };
     }
 
-    function showPolyPopupForChar(ch, charIndex, anchorRect) {
+    function getPolyAnchorRect(charIndex, preferredSource) {
+      // Prefer explicit source; otherwise try input highlight then output
+      const tryEls = [];
+      if (preferredSource === 'output' && thaiOutput) {
+        tryEls.push(thaiOutput.querySelector('[data-poly-idx="' + charIndex + '"]'));
+      }
+      if (inputHighlight) {
+        tryEls.push(inputHighlight.querySelector('[data-poly-idx="' + charIndex + '"]'));
+      }
+      if (thaiOutput) {
+        tryEls.push(thaiOutput.querySelector('[data-poly-idx="' + charIndex + '"]'));
+      }
+      for (const el of tryEls) {
+        if (el) return el.getBoundingClientRect();
+      }
+      if (typeof charIndex === 'number' && charIndex >= 0 && pinyinInput) {
+        const off = getCharOffsetInTextarea(charIndex);
+        const parentRect = pinyinInput.parentElement.getBoundingClientRect();
+        return {
+          left: parentRect.left + off.left,
+          top: parentRect.top + off.top,
+          bottom: parentRect.top + off.top + off.height,
+          width: off.width,
+          height: off.height,
+          right: parentRect.left + off.left + off.width
+        };
+      }
+      return null;
+    }
+
+    // Intentionally empty: popup is viewport-fixed at open time; no scroll tracking (avoids jank).
+    function repositionPolyPopup() {}
+
+    function placePolyPopupUnderAnchor() {
+      if (!polyPopup || polyPopup.classList.contains('hidden') || !polyPopupState.ch) return;
+      const idx = polyPopupState.charIndex;
+      const source = polyPopupState.source || 'input';
+      let rect = null;
+      if (source === 'output' && thaiOutput) {
+        const el = thaiOutput.querySelector('[data-poly-idx="' + idx + '"]');
+        if (el) rect = el.getBoundingClientRect();
+      } else if (inputHighlight) {
+        const el = inputHighlight.querySelector('[data-poly-idx="' + idx + '"]');
+        if (el) rect = el.getBoundingClientRect();
+      }
+      if (!rect) {
+        rect = getPolyAnchorRect(idx, source);
+      }
+      if (!rect) return;
+      // Always below the character (vertical placement rule fixed)
+      let left = Math.max(8, rect.left);
+      let top = Math.max(8, rect.bottom + 4);
+      const pw = polyPopup.offsetWidth || 140;
+      const maxL = window.innerWidth - pw - 8;
+      left = Math.min(left, maxL);
+      polyPopup.style.position = 'fixed';
+      polyPopup.style.zIndex = '9999';
+      polyPopup.style.left = left + 'px';
+      polyPopup.style.top = top + 'px';
+      polyPopup.style.right = 'auto';
+      polyPopup.style.bottom = 'auto';
+      polyPopup.style.margin = '0';
+      polyPopup.style.transform = 'none';
+    }
+
+    function showPolyPopupForChar(ch, charIndex, anchorRect, source) {
       if (!polyPopup) return;
       const readings = getReadings(ch);
       if (!readings || readings.length < 2) {
@@ -1318,42 +1434,32 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         return;
       }
       const cur = polyOverrides[ch] || 0;
-      polyPopupState = { ch, idx: cur, readings, charIndex };
-      renderPolyPopupList();
+      polyPopupState = {
+        ch, idx: cur, readings, charIndex,
+        source: source || (anchorRect && thaiOutput && thaiOutput.contains(document.activeElement) ? 'output' : 'input')
+      };
 
-      // Use fixed positioning so popup works for both input and output anchors
-      polyPopup.style.position = 'fixed';
-      polyPopup.style.zIndex = '100';
-      polyPopup.classList.remove('hidden');
-
-      let left, top;
-      if (anchorRect) {
-        left = anchorRect.left;
-        top = anchorRect.bottom + 4;
-      } else if (typeof charIndex === 'number' && charIndex >= 0 && pinyinInput) {
-        const off = getCharOffsetInTextarea(charIndex);
-        const parentRect = pinyinInput.parentElement.getBoundingClientRect();
-        left = parentRect.left + off.left;
-        top = parentRect.top + off.top + off.height + 4;
-      } else {
-        left = 16;
-        top = 80;
+      if (polyPopup.parentElement !== document.body) {
+        document.body.appendChild(polyPopup);
       }
-
-      const pw = polyPopup.offsetWidth || 120;
-      const maxL = window.innerWidth - pw - 8;
-      // Vertical position is fixed relative to the character (always below).
-      // Do not flip above/below — only clamp horizontally.
-      polyPopup.style.left = Math.min(Math.max(8, left), maxL) + 'px';
-      polyPopup.style.top = Math.max(8, top) + 'px';
+      renderPolyPopupList();
+      polyPopup.classList.remove('hidden');
+      placePolyPopupUnderAnchor();
     }
 
     function renderPolyPopupList() {
       const { ch, idx, readings } = polyPopupState;
       if (!ch) return;
+      const keepLeft = polyPopup.style.left;
+      const keepTop = polyPopup.style.top;
+
       polyPopup.innerHTML = '';
-      polyPopup.className = 'z-50 bg-white border border-china-border rounded-lg shadow-lg p-2 flex flex-col gap-1 min-w-[9rem]';
+      polyPopup.className = 'z-50 bg-white border border-china-border rounded-xl shadow-lg p-1.5 flex flex-col gap-1 min-w-[10rem]';
       polyPopup.style.position = 'fixed';
+      polyPopup.style.zIndex = '9999';
+      polyPopup.style.right = 'auto';
+      polyPopup.style.bottom = 'auto';
+      polyPopup.style.margin = '0';
       readings.forEach((py, i) => {
         const b = document.createElement('button');
         b.type = 'button';
@@ -1374,6 +1480,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         });
         polyPopup.appendChild(b);
       });
+
+      placePolyPopupUnderAnchor();
     }
 
     function selectPolyReading(i) {
@@ -1385,6 +1493,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       polyPopupState.idx = i;
       polyPopup.classList.add('hidden');
       polyPopupState.ch = null;
+      polyPopupState.lockedLeft = null;
+      polyPopupState.lockedTop = null;
       handleInput();
       // Keep focus where it was (output selection should not jump to input)
       try {
@@ -1424,9 +1534,25 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       if (e.key === 'Escape') {
         polyPopup.classList.add('hidden');
         polyPopupState.ch = null;
+        polyPopupState.lockedLeft = null;
+        polyPopupState.lockedTop = null;
       }
     }
     document.addEventListener('keydown', onPolyPopupKey);
+
+    function onPolyScroll() {
+      if (!polyPopup || polyPopup.classList.contains('hidden') || !polyPopupState.ch) return;
+      placePolyPopupUnderAnchor();
+    }
+    // Element scroll does not bubble — attach to scrollable panels too
+    window.addEventListener('scroll', onPolyScroll, true);
+    document.addEventListener('scroll', onPolyScroll, true);
+    window.addEventListener('resize', onPolyScroll);
+    if (thaiOutput) thaiOutput.addEventListener('scroll', onPolyScroll, { passive: true });
+    if (pinyinInput) pinyinInput.addEventListener('scroll', onPolyScroll, { passive: true });
+    const inputWrapEl = document.getElementById('inputWrap');
+    if (inputWrapEl) inputWrapEl.addEventListener('scroll', onPolyScroll, { passive: true });
+
 
     if (pinyinInput) {
       // Click on highlight poly-char spans (accurate position)
@@ -1439,7 +1565,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
           e.stopPropagation();
           const ch = span.getAttribute('data-poly-ch');
           const idx = parseInt(span.getAttribute('data-poly-idx'), 10);
-          showPolyPopupForChar(ch, idx, span.getBoundingClientRect());
+          showPolyPopupForChar(ch, idx, span.getBoundingClientRect(), 'input');
           // place caret near that char in textarea
           try {
             pinyinInput.focus();
@@ -1474,7 +1600,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
             const span = inputHighlight.querySelector('[data-poly-idx="' + idx + '"]');
             if (span) anchor = span.getBoundingClientRect();
           }
-          showPolyPopupForChar(ch, idx, anchor);
+          showPolyPopupForChar(ch, idx, anchor, 'input');
         } else if (polyPopup) {
           polyPopup.classList.add('hidden');
           polyPopupState.ch = null;
@@ -1580,7 +1706,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         if (thaiSrcTip) thaiSrcTip.classList.remove('show');
         const ch = span.getAttribute('data-poly-ch');
         const idx = parseInt(span.getAttribute('data-poly-idx') || '0', 10);
-        showPolyPopupForChar(ch, idx, span.getBoundingClientRect());
+        showPolyPopupForChar(ch, idx, span.getBoundingClientRect(), 'output');
         // Mark selection in input highlight only (no focus steal)
         if (pinyinInput && idx >= 0 && idx <= pinyinInput.value.length) {
           try {
@@ -1596,7 +1722,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       const text = pinyinInput.value;
       if (inputCharCount) inputCharCount.textContent = `${text.length}`;
       if (!text.trim()) {
+        closePolyPopup();
         thaiOutput.textContent = '';
+        lastPlainThai = '';
         if (inputHighlight) inputHighlight.innerHTML = '';
         if (emptyState) emptyState.style.display = 'flex';
         if (statusIndicator) {
@@ -1613,8 +1741,10 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       }
       try {
         const result = convertWithSpans(text);
+        lastPlainThai = result.plain || '';
         thaiOutput.innerHTML = result.html;
         updateInputHighlight(text);
+        syncPolyPopupWithText(text);
         if (statusIndicator) {
           statusIndicator.textContent = t('statusDone');
           statusIndicator.className = 'text-emerald-600 font-medium';
@@ -1648,9 +1778,26 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       });
     }
 
+    function getCopyText() {
+      // Prefer stored plain (real \n). Fallback: innerText preserves <br> as newlines.
+      if (lastPlainThai) return lastPlainThai;
+      if (!thaiOutput) return '';
+      // Walk DOM so <br> become \n and block boundaries become newlines
+      let out = '';
+      const walk = (node) => {
+        if (node.nodeType === 3) { out += node.nodeValue; return; }
+        if (node.nodeType !== 1) return;
+        const tag = node.tagName;
+        if (tag === 'BR') { out += '\n'; return; }
+        for (const c of node.childNodes) walk(c);
+      };
+      walk(thaiOutput);
+      return out.replace(/\r\n/g, '\n');
+    }
+
     if (copyBtn) {
       copyBtn.addEventListener('click', async () => {
-        const outputText = thaiOutput.textContent;
+        const outputText = getCopyText();
         if (!outputText) return;
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {

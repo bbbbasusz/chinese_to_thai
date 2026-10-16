@@ -227,6 +227,10 @@
             </span>
             <button id="toggleZhuyinBtn" class="example-btn text-xs bg-china-darkred text-white border border-china-gold hover:bg-china-red px-3 py-1.5 rounded-full shadow-sm"><span data-i18n="zhuyinKb">แป้นจู้อิน</span></button>
             <button id="toggleDiacriticBtn" class="example-btn text-xs bg-china-darkred text-white border border-china-gold hover:bg-china-red px-3 py-1.5 rounded-full shadow-sm"><span data-i18n="toneKb">วรรณยุกต์</span></button>
+            <label class="example-btn text-xs bg-white border border-china-border text-china-darkred px-3 py-1.5 rounded-full shadow-sm cursor-pointer inline-flex items-center gap-1.5 select-none">
+                <input type="checkbox" id="long123Toggle" class="rounded border-china-border text-china-red focus:ring-china-gold">
+                <span data-i18n="long123Label">123성 장음으로 표시</span>
+            </label>
         </div>
 
         <!-- Diacritic / Tone mark keyboard -->
@@ -463,47 +467,77 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     '':  { mid: 'อ', low: 'อ', high: 'อ' }
   };
 
+  // short = ⁴⁺¹²³𐞢ʲʷ form (tone 4 always; tones 1–3 when final does NOT end in n/ng)
+  // long  = ¹²³ⁿᵑ form (tones 1–3 when final ends in n or ng)
+  // neutral = 경성 / เสียงเบา
+
   const RIMES = {
-    'ы̣': { mid: '◌ือ', low: '◌ือ', high: '◌ึ' },
-    'ы':  { mid: '◌ือ', low: '◌ือ', high: '◌ึ' },
-    'и':  { mid: '◌ี',  low: '◌ี',  high: '◌ี' },
-    'у':  { mid: '◌ู',  low: '◌ู',  high: '◌ู' },
-    'ү':  { mid: 'วี',  low: 'วี',  high: '(◌ฺห)วี' },
-    'а':  { mid: '◌า',  low: '◌า',  high: '◌ะ' },
-    'о':  { mid: 'โ◌',  low: 'โ◌',  high: 'โ◌' },
-    'ъ':  { mid: 'เ◌อ', low: 'เ◌อ', high: 'เ◌อ' },
-    'є':  { mid: 'เ◌',  low: 'เ◌',  high: 'เ◌' },
-    'ай': { mid: '◌าย', low: '◌าย', high: 'ไ◌' },
-    'єй': { mid: 'เ◌ย์', low: 'เ◌ย์', high: 'เ◌ย์' },
-    'аў': { mid: '◌าว', low: '◌าว', high: 'เ◌า' },
-    'оў': { mid: 'โ◌ว', low: 'โ◌ว', high: 'โ◌ว' },
-    'ан': { mid: '◌าน', low: '◌าน', high: '◌ัน' },
-    'ън': { mid: 'เ◌ิน', low: 'เ◌ิน', high: 'เ◌ิน' },
-    'аң': { mid: '◌าง', low: '◌าง', high: '◌ัง' },
-    'ъң': { mid: 'เ◌ิง', low: 'เ◌ิง', high: 'เ◌ิง' },
-    'р':  { mid: '◌ร',  low: '◌ร',  high: '◌ร' },
-    'йа': { mid: 'เ◌ีย', low: 'เ◌ีย', high: 'เ◌ีย' },
-    'йо': { mid: 'โย',  low: 'โย',  high: 'โย' },
-    'йє': { mid: 'เ◌ีย', low: 'เ◌ีย', high: 'เ◌ีย' },
-    'йаў':{ mid: 'เ◌ียว', low: 'เ◌ียว', high: 'เ◌ียว' },
-    'йоў':{ mid: '◌ิว', low: '◌ิว', high: '◌ิว' },
-    'йан':{ mid: 'เ◌ียน', low: 'เ◌ียน', high: 'เ◌ียน' },
-    'ин': { mid: '◌ิน', low: '◌ิน', high: '◌ิน' },
-    'йаң':{ mid: 'เ◌ียง', low: 'เ◌ียง', high: 'เ◌ียง' },
-    'иң': { mid: '◌ิง', low: '◌ิง', high: '◌ิง' },
-    'ўа': { mid: '◌วา', low: '◌วา', high: '◌วา' },
-    'ўо': { mid: '◌ัว', low: '◌ัว', high: '◌ัว' },
-    'ўай':{ mid: '◌วาย', low: '◌วาย', high: 'ไ◌ย' },
-    'ўєй':{ mid: '◌ุย', low: '◌ุย', high: '◌ุย' },
-    'ўан':{ mid: '◌วาน', low: '◌วาน', high: '◌วัน' },
-    'ўън':{ mid: '◌ุน', low: '◌ุน', high: '◌ุน' },
-    'ўаң':{ mid: '◌วาง', low: '◌วาง', high: '◌วัง' },
-    'оң': { mid: '◌ง',  low: '◌ง',  high: '◌ง' },
-    'ҩє': { mid: 'เ◌ฺว', low: 'เ◌ฺว', high: 'เ◌ฺว' },
-    'ҩан':{ mid: 'เ◌ฺวียน', low: 'เ◌ฺวียน', high: 'เ◌ฺวียน' },
-    'үн': { mid: 'วิน', low: 'วิน', high: '(◌ฺห)วิน' },
-    'йоң':{ mid: '◌ยง', low: '◌ยง', high: '◌ฺยง' }
+    'ы̣':  { short: '◌ือ', neutral: '◌ึ' },
+    'ы':   { short: '◌ือ', neutral: '◌ึ' },
+    'и':   { short: '◌ี' },
+    'у':   { short: '◌ู' },
+    'ү':   { short: '◌ฺวี', high: '◌ฺหวี' },
+    'а':   { short: '◌า', neutral: '◌ะ' },
+    'о':   { short: 'โ◌', afterLabial: '◌ัว' },  // after b p m
+    'ъ':   { short: 'เ◌อ' },
+    'є':   { short: 'เ◌' },
+    'ай':  { short: 'ไ◌', long: '◌าย' },
+    'єй':  { short: 'เ◌ย์' },
+    'єйх': { short: '.' },
+    'аў':  { short: 'เ◌า', long: '◌าว' },
+    'оў':  { short: 'โ◌ว' },
+    'ан':  { short: '◌ัน', long: '◌าน' },
+    'ън':  { short: 'เ◌ิน' },
+    'аң':  { short: '◌ัง', long: '◌าง' },
+    'ъң':  { short: 'เ◌ิง' },
+    'р':   { short: 'เ◌อร์' },
+    'йа':  { short: 'เ◌ีย' },
+    'йо':  { short: 'โย' },
+    'йє':  { short: 'เ◌ีย' },
+    'йаў': { short: 'เ◌ียว' },
+    'йоў': { short: '◌ิว' },
+    'йан': { short: 'เ◌ียน' },
+    'ин':  { short: '◌ิน' },
+    'йаң': { short: 'เ◌ียง' },
+    'иң':  { short: '◌ิง' },
+    'ўа':  { short: '◌วา' },
+    'ўо':  { short: '◌ัว' },
+    'ўай': { short: 'ไ◌ย', long: '◌วาย' },
+    'ўєй': { short: '◌ุย' },
+    'ўан': { short: '◌ฺวัน', long: '◌ฺวาน' },
+    'ўън': { short: '◌ุน' },
+    'ўаң': { short: '◌วัง', long: '◌วาง' },
+    'оң':  { short: '◌ง' },
+    'ҩє':  { short: 'เ◌ฺว', high: '◌ฺเหฺว' },
+    'ҩан': { short: 'เ◌วียน', high: '◌ฺเหวียน' },
+    'үн':  { short: '◌ฺวิน', high: '◌ฺหวิน' },
+    'йоң': { short: '◌ฺยง' }
   };
+
+  // When true: tones 1–3 use long form (⁽¹²³⁾) if available
+  // Tone 4 always uses short form (⁴⁺¹²³)
+  let useLongFor123 = false;
+
+  function pickRimeForm(entry, tone, initial, cls, finalKey) {
+    if (!entry) return null;
+    // neutral / light tone (경성 / เสียงเบา) — tone 5 only
+    if (tone === 5 && entry.neutral) return entry.neutral;
+    // o after b/p/m → ◌ัว
+    if (entry.afterLabial && (initial === 'б' || initial === 'п' || initial === 'м')) {
+      return entry.afterLabial;
+    }
+    // high-class special forms for ü-series (ü üe üan ün), including ย-series onset
+    // ย 계열 고자음 also takes ห-series rime (◌ฺหวี, ◌ฺเหฺว, …)
+    if (cls === 'high' && entry.high) {
+      const ueSeries = (finalKey === 'ү' || finalKey === 'ҩє' || finalKey === 'ҩан' || finalKey === 'үн');
+      if (ueSeries || (initial !== 'ҩ' && initial !== 'й')) return entry.high;
+    }
+    // Dual-form rule (user table):
+    //  - tone 4 → always short (⁴⁺¹²³)
+    //  - tones 1–3 → short by default; long only if useLongFor123 switch is ON
+    if (tone >= 1 && tone <= 3 && useLongFor123 && entry.long) return entry.long;
+    return entry.short || entry.long || null;
+  }
 
   const COMBINING_TONES = { '\u0304': 1, '\u0301': 2, '\u030C': 3, '\u0300': 4 };
   const PRECOMPOSED = {
@@ -536,7 +570,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     'ㄨㄢ':'uan','ㄨㄣ':'un','ㄨㄤ':'uang','ㄨㄥ':'ong',
     'ㄩㄝ':'üe','ㄩㄢ':'üan','ㄩㄣ':'ün','ㄩㄥ':'iong'
   };
-  const ZHUYIN_TONE = { 'ˉ':1, 'ˊ':2, 'ˇ':3, 'ˋ':4, '˙':0 };
+  const ZHUYIN_TONE = { 'ˉ':1, 'ˊ':2, 'ˇ':3, 'ˋ':4, '˙':5 };
   const ZHUYIN_SYLLABIC = new Set(['zh','ch','sh','r','z','c','s']);
 
   function normalizeAndExtractTone(raw) {
@@ -557,7 +591,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         base += PRECOMPOSED[ch];
       } else if (/[1-5]/.test(ch)) {
         tone = parseInt(ch, 10);
-        if (tone === 5) tone = 0;
+        // tone 5 kept as light tone
       } else if (!/[\u0300-\u036f]/.test(ch)) {
         base += ch;
       }
@@ -573,7 +607,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     str = str.replace(/(n|l)ü(an|e|n)?/g, '$1ü$2');
     str = str.replace(/(zh|ch|sh|r)i/g, '$1ы̣');
     str = str.replace(/(z|c|s)i/g, '$1ы');
-    str = str.replace(/(b|p|m|f)o$/g, '$1uo');
+    str = str.replace(/(b|p|m)o$/g, '$1uo');
     str = str.replace(/ung/g, 'ong');
     str = str.replace(/^u$/g, 'wu');
     str = str.replace(/^i(n|ng)?$/g, 'yi$1');
@@ -605,6 +639,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     str = str.replace(/ao/g,'аў').replace(/ou/g,'оў').replace(/ai/g,'ай').replace(/ei/g,'єй');
     str = str.replace(/(a|e|o)i/g,'$1й').replace(/(a|e|o)u/g,'$1ў');
     str = str.replace(/üa/g,'ҩа').replace(/üe/g,'ҩє').replace(/ü/g,'ү');
+    // er (儿化 / ㄦ) → р → เ◌อร์  (must before e→ъ)
+    str = str.replace(/er/g, 'р');
     str = str.replace(/ê/g,'є').replace(/a/g,'а').replace(/e/g,'ъ').replace(/i/g,'и').replace(/o/g,'о').replace(/u/g,'у');
     str = str.replace(/ng/g,'ң').replace(/n/g,'н');
     str = str.replace(/[^а-яёўңџчшжѕцщђћы̣ъєйүҩ]/gi, '');
@@ -637,10 +673,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
     let thaiCons = consInfo[cls] || consInfo.low || consInfo.mid || 'อ';
 
-    let rime = null;
-    if (RIMES[final]) {
-      rime = RIMES[final][cls] || RIMES[final].mid || RIMES[final].low || RIMES[final].high;
-    }
+    const rimeEntry = RIMES[final];
+    let rime = pickRimeForm(rimeEntry, tone, initial, cls, final);
     if (!rime || rime === '.') {
       if (!final) rime = '◌';
       else if (final.startsWith('ў')) rime = '◌ัว';
@@ -650,10 +684,29 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       else rime = '◌';
     }
 
+    // High-class rime already embeds ฺห / ฺหว / ห — drop leading ห from consonant
+    // so ย-series high uses ย+◌ฺหวี → ยฺหวี (not หยฺหวี)
+    if (cls === 'high' && thaiCons.startsWith('ห') && thaiCons.length > 1 &&
+        (rime.includes('ฺห') || rime.includes('ฺเห') || rime.includes('ฺหว') ||
+         rime.includes('(◌ฺห)') || rime.includes('หวี') || rime.includes('หวิน'))) {
+      thaiCons = thaiCons.slice(1);
+    }
+
+    // Tone on medial ย/ว ONLY for: ua/uai/uan/uang, ü/üan/ün, iong
+    const TONE_ON_SEMI = new Set([
+      'ўа', 'ўай', 'ўан', 'ўаң',   // ua uai uan uang
+      'ү', 'ҩан', 'үн',             // ü üan ün
+      'йоң'                         // iong
+    ]);
+    const placeToneOnSemi = TONE_ON_SEMI.has(final);
+
     const UPPER_VOWELS = /[ิีึืุูัํ็]/;
     let result;
     if (rime.includes('◌')) {
-      if (toneMark && UPPER_VOWELS.test(rime)) {
+      if (toneMark && placeToneOnSemi) {
+        // insert consonant at ◌ first without tone, then put tone on ย/ว
+        result = rime.replace('◌', thaiCons);
+      } else if (toneMark && UPPER_VOWELS.test(rime)) {
         const parts = rime.split('◌');
         const prefix = parts[0] || '';
         const suffix = parts[1] || '';
@@ -664,32 +717,84 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         result = rime.replace('◌', thaiCons + toneMark);
       }
     } else {
-      result = thaiCons + toneMark + rime;
+      result = thaiCons + (placeToneOnSemi ? '' : toneMark) + rime;
+    }
+
+    // Semi-vowel finals: tone mark on ย or ว
+    if (toneMark && placeToneOnSemi) {
+      result = result.replace(/[่้๊๋]/g, '');
+      if (/[ยว]/.test(result)) {
+        result = result.replace(/([ยว])/, '$1' + toneMark);
+      } else {
+        // fallback: after consonant
+        result = result.replace(thaiCons, thaiCons + toneMark);
+      }
     }
 
     // high-class ห rules
-    if (cls === 'high' && thaiCons.startsWith('ห') && thaiCons.length > 1) {
+    // ย/ว as onset (initial й ҩ ў → หย/หว): keep หย/หว, never rewrite as ยฺห
+    const isGlideCons = (initial === 'й' || initial === 'ҩ' || initial === 'ў');
+    if (cls === 'high' && thaiCons.startsWith('ห') && thaiCons.length > 1 && !isGlideCons) {
       const baseCons = thaiCons.slice(1);
       const isUe  = /เ/.test(result) && /ว/.test(result) && !/ย/.test(result);
       const isUan = /เ/.test(result) && /วียน/.test(result);
-      if (isUe) {
-        // tone after ฺ cluster: ฺเหฺว + tone
+      if (isUe && placeToneOnSemi) {
         result = baseCons + 'ฺเหฺว' + toneMark;
-      } else if (isUan) {
+      } else if (isUan && placeToneOnSemi) {
         result = baseCons + 'ฺเหวี' + toneMark + 'ยน';
+      } else if (isUe) {
+        result = baseCons + 'ฺเหฺว';
+        // tone already in result or attach after upper vowel cluster
+        if (toneMark && !/[่้๊๋]/.test(result)) result = result + toneMark;
+      } else if (isUan) {
+        result = baseCons + 'ฺเหวียน';
+        if (toneMark) result = result.replace(/ี/, 'ี' + toneMark);
       } else if (/[ยว]/.test(result)) {
-        // strip leading ห from cluster; put ฺห after ย/ว, tone after ฺห
-        result = result.replace(new RegExp('ห(' + baseCons + ')([่้๊๋]?)'), '$1$2');
-        result = result.replace(/([ยว])([่้๊๋]?)/, '$1ฺห$2');
+        // ห after ย/ว ONLY for ü{∅|e|an|n} — never for ia/ian/iang/ua…
+        const ueSeries = (final === 'ү' || final === 'ҩє' || final === 'ҩан' || final === 'үн');
+        if (ueSeries) {
+          result = result.replace(new RegExp('ห(' + baseCons + ')([่้๊๋]?)'), '$1$2');
+          result = result.replace(/([ยว])([่้๊๋]?)/, '$1$2ฺห');
+        }
+        // else: keep leading ห (เหลียน, เหลียง, หวา…) — do NOT move ห after ย
       }
     }
 
     result = result.replace(/[()]/g, '').replace(/\./g, '');
 
     // Tone marks must come AFTER phinthu ฺ (never before)
-    // e.g. ฺ่ → ฺ่ , ลฺ่ห → ลฺห่
     result = result.replace(/([่้๊๋]+)(ฺ+)/g, '$2$1');
     result = result.replace(/([ก-ฮ])([่้๊๋]+)(ฺ+)([ก-ฮห]?)/g, '$1$3$4$2');
+
+    // Tone on medial ย/ว only for ua/uai/uan/uang, ü/üan/ün, iong (same set as TONE_ON_SEMI)
+    // Already handled via placeToneOnSemi above — keep a safety net for those finals only
+    if (toneMark && placeToneOnSemi) {
+      let core = result.replace(/[่้๊๋]/g, '');
+      if (core.includes('ว') && !/[ัา]ว/.test(core)) {
+        result = core.replace(/ว/, 'ว' + toneMark);
+      } else if (core.includes('ย')) {
+        result = core.replace(/ย/, 'ย' + toneMark);
+      }
+    }
+
+    // Tone after upper vowels (ยว่ี → ยวี่)
+    result = result.replace(/([่้๊๋])([ิีึืุูั])/g, '$2$1');
+
+    // yü4: ย่วี → ยวี่ (tone after ว+ี)
+    if (final === 'ү' || final === 'үн') {
+      result = result.replace(/ย([่้๊๋])ว([ิี]?)/g, 'ยว$2$1');
+      result = result.replace(/([่้๊๋])([ิี])/g, '$2$1');
+    }
+
+    // Glide onset: force หย/หว (not ยฺห/วฺห), but keep ü-series ยฺหวี / ยฺหวิน
+    if (isGlideCons) {
+      result = result.replace(/ยฺห(?!ว)/g, 'หย');
+      result = result.replace(/วฺห(?!ว)/g, 'หว');
+    }
+
+    // Syllable-final ว after ั/า: tone on vowel, not on ว (ปัว๋ → ปั๋ว)
+    result = result.replace(/ัว([่้๊๋])/g, 'ั$1ว');
+    result = result.replace(/าว([่้๊๋])/g, 'า$1ว');
 
     return result;
   }
@@ -881,7 +986,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     setOverride(ch, idx) { polyOverrides[ch] = idx; },
     getOverrides: () => polyOverrides,
     setDictionary(dict) { HANZI_PINYIN = dict; },
-    getDictionary: () => HANZI_PINYIN
+    getDictionary: () => HANZI_PINYIN,
+    setUseLongFor123(v) { useLongFor123 = !!v; },
+    getUseLongFor123: () => useLongFor123
   };
 
 
@@ -918,7 +1025,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         else base += 'ü';
       } else if (/[1-5]/.test(ch)) {
         tone = parseInt(ch, 10);
-        if (tone === 5) tone = 0;
+        // tone 5 kept as light tone
       } else if (!/[\u0300-\u036f]/.test(ch)) {
         base += ch;
       }
@@ -999,7 +1106,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleSummary: 'สรุปกฎการแปลง',
       ruleLine1: '※ พยัญชนะกลาง (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ นอกกลุ่มกลาง: ˉ→ต่ำ, ˊ→สูง, ˇ→สูง+่, ˋ→ต่ำ+่',
-      ruleLine3: '※ แยกพยางค์พินอินต่อเนื่องอัตโนมัติ · รองรับ NFD',
+      ruleLine3: '※ พินอินต่อเนื่อง · NFD · วรรณยุกต์ 4 สั้น; 1–3 ยาวเมื่อเปิดสวิตช์',
+      long123Label: 'แสดงสระยาวสำหรับวรรณยุกต์ 1–3',
+      long123Label: 'สระยาว 1–3',
       inputPlaceholder: 'พิมพ์จีน พินอิน หรือจู้อิน...\nเช่น 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: 'พร้อม',
       statusConverting: 'กำลังแปลง...',
@@ -1033,7 +1142,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleSummary: '转换规则摘要',
       ruleLine1: '※ 中辅音 (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ 非中辅音: ˉ→低辅音, ˊ→高辅音, ˇ→高辅音+่, ˋ→低辅音+่',
-      ruleLine3: '※ 连续拼音自动分音节 · 支持 NFD 变音符号规范化',
+      ruleLine3: '※ 连续拼音 · NFD · 4声短元音；1–3声仅在开关开启时长元音',
+      long123Label: '1–3声用长元音显示',
+      long123Label: '1–3声长音',
       inputPlaceholder: '输入汉字、拼音或注音...\n例：你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '就绪',
       statusConverting: '转换中...',
@@ -1067,7 +1178,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleSummary: '轉換規則摘要',
       ruleLine1: '※ 中輔音 (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ 非中輔音: ˉ→低輔音, ˊ→高輔音, ˇ→高輔音+่, ˋ→低輔音+่',
-      ruleLine3: '※ 連續拼音自動分音節 · 支援 NFD 變音符號正規化',
+      ruleLine3: '※ 連續拼音 · NFD · 4聲短元音；1–3聲僅在開關開啟時長元音',
+      long123Label: '1–3聲用長元音顯示',
+      long123Label: '1–3聲長音',
       inputPlaceholder: '輸入漢字、拼音或注音...\n例：你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '就緒',
       statusConverting: '轉換中...',
@@ -1101,7 +1214,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleSummary: '변환 규칙 요약',
       ruleLine1: '※ 중자음(ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ 중자음 외: ˉ→저자음, ˊ→고자음, ˇ→고자음+่, ˋ→저자음+่',
-      ruleLine3: '※ 공백 없는 연속 병음 자동 음절 분리 · NFD 다이어크리틱 정규화 지원',
+      ruleLine3: '※ 연속 병음 자동 분리 · NFD · 4성은 단모음, 1–3성은 스위치 시 장모음',
+      long123Label: '123성 장음으로 표시',
+      long123Label: '123성 장음',
       inputPlaceholder: '한자·병음·주음을 입력하세요...\n예: 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '대기 중',
       statusConverting: '변환 중...',
@@ -1135,7 +1250,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleSummary: 'Rule summary',
       ruleLine1: '※ Mid-class (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ Other classes: ˉ→low, ˊ→high, ˇ→high+่, ˋ→low+่',
-      ruleLine3: '※ Continuous pinyin auto-syllable split · NFD diacritic normalization',
+      ruleLine3: '※ Continuous pinyin · NFD · tone4 short; 1–3 long only if switch on',
+      long123Label: 'Long vowels for tones 1–3',
+      long123Label: '1–3 long vowel',
       inputPlaceholder: 'Enter Chinese, Pinyin, or Zhuyin...\ne.g. 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: 'Ready',
       statusConverting: 'Converting...',
@@ -1207,6 +1324,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
     // i18n
     applyI18n(currentLang);
+
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         applyI18n(btn.dataset.lang);
@@ -1758,6 +1876,15 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       }
     }
 
+
+    const long123Toggle = document.getElementById('long123Toggle');
+    if (long123Toggle) {
+      long123Toggle.addEventListener('change', () => {
+        if (window.ChineseToThai) window.ChineseToThai.setUseLongFor123(long123Toggle.checked);
+        handleInput();
+      });
+    }
+
     if (pinyinInput) {
       pinyinInput.addEventListener('input', handleInput);
       pinyinInput.addEventListener('scroll', () => {
@@ -1769,6 +1896,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       pinyinInput.addEventListener('change', handleInput);
       pinyinInput.addEventListener('keyup', handleInput);
     }
+
+
 
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
@@ -1796,30 +1925,47 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     }
 
     if (copyBtn) {
-      copyBtn.addEventListener('click', async () => {
+      copyBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
         const outputText = getCopyText();
-        if (!outputText) return;
+        if (!outputText) {
+          showToast(t('copyFail'), true);
+          return;
+        }
+        let ok = false;
         try {
           if (navigator.clipboard && navigator.clipboard.writeText) {
             await navigator.clipboard.writeText(outputText);
-            showToast(t('copied'));
-            return;
+            ok = true;
           }
-        } catch (_) { /* fall through */ }
-        const ta = document.createElement('textarea');
-        ta.value = outputText;
-        ta.style.position = 'fixed';
-        ta.style.opacity = '0';
-        document.body.appendChild(ta);
-        ta.select();
-        try {
-          document.execCommand('copy');
-          showToast(t('copied'));
-        } catch (err) {
-          showToast(t('copyFail'), true);
-        } finally {
-          document.body.removeChild(ta);
+        } catch (_) { ok = false; }
+        if (!ok) {
+          try {
+            const ta = document.createElement('textarea');
+            ta.value = outputText;
+            ta.setAttribute('readonly', '');
+            ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            ta.setSelectionRange(0, ta.value.length);
+            ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+          } catch (_) { ok = false; }
         }
+        if (!ok && thaiOutput) {
+          try {
+            const range = document.createRange();
+            range.selectNodeContents(thaiOutput);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            ok = document.execCommand('copy');
+            sel.removeAllRanges();
+          } catch (_) { ok = false; }
+        }
+        showToast(ok ? t('copied') : t('copyFail'), !ok);
       });
     }
 

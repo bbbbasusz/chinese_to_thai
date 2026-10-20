@@ -1,63 +1,37 @@
-# 🇹🇭🇨🇳 **ตัวแปลงพินอินจีนเป็นอักษรไทย | 中文拼音转泰文工具**
+## ภาษาไทย
 
-[ภาษาไทย](#ภาษาไทย) | [简体中文](#简体中文) | [繁體中文](#繁體中文) | [한국어](#한국어) | [English](#English)
+### ตัวแปลงภาษาจีนเป็นอักษรไทย
 
----
+เครื่องมือออนไลน์สำหรับถอดเสียงภาษาจีนเป็นอักษรไทย รองรับอักษรจีนตัวย่อและตัวเต็ม พินอิน (Pinyin) และจู้อิน (Zhuyin) พร้อมระบบแปลงอัตโนมัติ การเลือกเสียงอ่านของอักษรที่มีหลายเสียง และแป้นพิมพ์สำหรับป้อนเครื่องหมายวรรณยุกต์และสัญลักษณ์การออกเสียง
 
-## <a id="ภาษาไทย"></a>🇹🇭 ภาษาไทย
-**เครื่องมือแปลงอักษรจีน พินอิน หรือจู้อิน เป็นอักษรไทย**
-เว็บไซต์นี้ช่วยให้ผู้ใช้งานสามารถป้อนตัวอักษรจีน, พินอิน (Pinyin) หรือจู้อิน (Zhuyin) แล้วระบบจะทำการแปลงเสียงเป็นอักษรไทยโดยอัตโนมัติ พร้อมรองรับการเลือกเสียงพ้องและการตั้งค่าเสียงวรรณยุกต์ตามกฎการถอดเสียงภาษาไทยอย่างแม่นยำ
+🔗 **ทดลองใช้งาน:** https://bbbbasusz.github.io/chinese_to_thai/
 
-- **ฟีเจอร์หลัก:**
-  - รองรับการแปลงอักษรจีนทั้งตัวย่อและตัวเต็ม
-  - รองรับพินอินและจู้อิน (Bopomofo)
-  - คีย์บอร์ดจำลองสำหรับป้อนเครื่องหมายวรรณยุกต์และพยัญชนะจู้อิน
-  - ตัดพยางค์พินอินต่อเนื่องอัตโนมัติ
+## 简体中文
 
----
+### 中文转泰文音译工具
 
-## <a id="简体中文"></a>🇨🇳 简体中文
-**中文转泰语注音/转写工具**
-这是一个网页端工具，支持将汉字、拼音或注音符号（Bopomofo）自动转换为泰语拼音（泰文字母转写）。它能帮助泰语学习者或需要用泰语标注中文发音的人准确地进行发音转换。
+这是一个将中文语音转写为泰文字母的在线工具，支持简体中文、繁体中文、汉语拼音和注音符号。提供自动转换、多音字读音选择，以及用于输入声调符号和注音符号的虚拟键盘。
 
-- **主要功能：**
-  - 支持简体字与繁体字输入
-  - 支持拼音与注音符号（Zhuyin）
-  - 内置声调与注音符号虚拟键盘，点击即可输入
-  - 自动连写拼音分词与规范化处理
+🔗 **在线使用：** https://bbbbasusz.github.io/chinese_to_thai/
 
----
+## 繁體中文
 
-## <a id="繁體中文"></a>🇭🇰 繁體中文
-**中文轉泰語注音/轉寫工具**
-這是一個網頁端工具，支援將漢字、拼音或注音符號（Bopomofo）自動轉換為泰語拼音（泰文字母轉寫）。它能幫助泰語學習者或需要用泰語標註中文發音的人準確地進行發音轉換。
+### 中文轉泰文音譯工具
 
-- **主要功能：**
-  - 支援簡體字與繁體字輸入
-  - 支援拼音與注音符號（Zhuyin）
-  - 內置聲調與注音符號虛擬鍵盤，點擊即可輸入
-  - 自動連寫拼音分詞與規範化處理
+這是一個將中文語音轉寫為泰文字母的線上工具，支援簡體中文、繁體中文、漢語拼音及注音符號。提供自動轉換、多音字讀音選擇，以及用於輸入聲調符號和注音符號的虛擬鍵盤。
 
----
+🔗 **線上使用：** https://bbbbasusz.github.io/chinese_to_thai/
 
-## <a id="한국어"></a>🇰🇷 한국어
-**중국어-태국어 발음 표기(Transliteration) 변환 도구**
-중국어 한자, 병음(Pinyin), 주음(Zhuyin)을 입력하면 태국어 문자로 자동 변환해 주는 웹 기반 도구입니다. 태국어 화자나 학습자가 중국어 발음을 태국 문자로 쉽게 읽을 수 있도록 정확한 태국어 표기법과 성조 규칙을 지원합니다.
+## 한국어
 
-- **주요 기능:**
-  - 간체자 및 번체자 입력 지원
-  - 병음(Pinyin) 및 주음부호(Bopomofo) 지원
-  - 성조 및 주음 입력용 가상 키보드 제공
-  - 연속된 병음의 자동 음절 분할 및 정규화 기능
+### 중국어 태국 문자 음역 변환기
 
----
+중국어 발음을 태국 문자로 표기하는 웹 도구입니다. 중국어 간체·번체, 한어병음(Pinyin), 주음부호(Zhuyin)를 지원하며, 자동 변환과 다독자의 발음 선택 기능을 제공합니다. 성조 기호와 주음부호를 쉽게 입력할 수 있는 가상 키보드도 포함되어 있습니다.
 
-## <a id="English"></a>🇬🇧 English
-**Chinese to Thai Transliteration System**
-A web-based tool designed to convert Chinese characters, Pinyin, or Zhuyin (Bopomofo) into Thai script transliteration. It helps users accurately transcribe Chinese pronunciation into Thai phonetic spelling following standard transliteration rules.
+🔗 **온라인 사용:** https://bbbbasusz.github.io/chinese_to_thai/
 
-- **Key Features:**
-  - Supports both Simplified and Traditional Chinese characters
-  - Supports Pinyin and Zhuyin (Bopomofo) inputs
-  - On-screen virtual keyboards for tone marks and Zhuyin symbols
-  - Automatic continuous Pinyin syllable segmentation and normalization
+# Chinese to Thai Transliteration
+
+A multilingual web tool for transliterating Chinese into Thai script.
+
+🔗 **Try it online:** https://bbbbasusz.github.io/chinese_to_thai/

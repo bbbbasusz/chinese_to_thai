@@ -138,6 +138,8 @@
         .poly-popup-btn.active { background: #ea580c; color: #fff; border-color: #c2410c; }
         .poly-popup-btn .font-thai { font-family: "Noto Sans Thai", sans-serif; color: #8B0000; }
         .poly-popup-btn.active .font-thai { color: #fff; }
+        .poly-popup-btn .thai-alt { color: #9ca3af; }
+        .poly-popup-btn.active .thai-alt { color: rgba(255,255,255,0.7); }
         #thaiSrcTip {
             position: absolute;
             z-index: 30;
@@ -1654,7 +1656,13 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         b.className = 'poly-popup-btn text-left w-full flex items-center justify-between gap-3' + (i === idx ? ' active' : '');
         const label = formatReading(py);
         let thaiPreview = '';
-        try { thaiPreview = convertPinyinToThai(py); } catch (_) { thaiPreview = ''; }
+        try {
+          const raw = convertPinyinToThai(py);
+          // Gray parentheses for dual short/long forms
+          thaiPreview = (typeof formatAltMarkers === 'function')
+            ? formatAltMarkers(raw, true)
+            : String(raw).replace(/\uE000/g, '(').replace(/\uE001/g, ')');
+        } catch (_) { thaiPreview = ''; }
         b.innerHTML =
           '<span class="flex items-center gap-1.5 min-w-0">' +
             '<span class="text-gray-400 tabular-nums w-4 shrink-0">' + (i + 1) + '.</span>' +

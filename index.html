@@ -132,6 +132,7 @@
         #thaiOutput .thai-syl.is-poly:hover { background: rgba(219, 234, 254, 0.5); border-radius: 2px; }
         #thaiOutput .thai-syl.is-alt:hover { background: rgba(255, 237, 213, 0.6); border-radius: 2px; }
         .thai-syl.is-alt { color: #ea580c; font-weight: 600; }
+        .thai-alt { color: #9ca3af; font-weight: 400; }
         .poly-popup-btn { font-size: 13px; padding: 6px 12px; min-height: 2.25rem; border-radius: 8px; border: 1px solid #E5DDC8; background: #fff; cursor: pointer; box-sizing: border-box; }
         .poly-popup-btn:hover { background: #F3E5AB; }
         .poly-popup-btn.active { background: #ea580c; color: #fff; border-color: #c2410c; }
@@ -796,7 +797,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       }
       altResult = altResult.replace(/[()]/g, '').replace(/\./g, '');
       altResult = altResult.replace(/([่้๊๋]+)(ฺ+)/g, '$2$1');
-      result = result + '(' + altResult + ')';
+      result = result + '\uE000' + altResult + '\uE001';  // markers for gray (alt) span
     }
 
     // Tone marks must come AFTER phinthu ฺ (never before)
@@ -1778,7 +1779,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     // Convert with per-character Thai spans for poly color + hover source
     function convertWithSpans(inputText) {
       if (!HANZI_PINYIN) {
-        return { html: escapeHtml(convertPinyinToThai(inputText)), plain: convertPinyinToThai(inputText) };
+        const full0 = convertPinyinToThai(inputText);
+        return { html: formatAltMarkers(escapeHtml(full0), true), plain: formatAltMarkers(full0, false) };
       }
       let html = '';
       let plain = '';
@@ -1794,15 +1796,16 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         if (readings && readings.length) {
           const idx = polyOverrides[ch] || 0;
           const py = readings[Math.min(idx, readings.length - 1)];
-          const thai = convertPinyinToThai(py);
-          plain += thai;
+          const thaiRaw = convertPinyinToThai(py);
+          plain += formatAltMarkers(thaiRaw, false);
+          const thaiRendered = formatAltMarkers(escapeHtml(thaiRaw), true);
           if (readings.length > 1) {
             const isAlt = idx > 0;
             const cls = isAlt ? 'thai-syl is-poly is-alt' : 'thai-syl is-poly';
             const tip = ch + ' ' + formatReading(py);
-            html += '<span class="' + cls + '" data-src="' + ch + '" data-poly-ch="' + ch + '" data-poly-idx="' + charIndex + '" title="' + tip + '">' + thai + '</span>';
+            html += '<span class="' + cls + '" data-src="' + ch + '" data-poly-ch="' + ch + '" data-poly-idx="' + charIndex + '" title="' + tip + '">' + thaiRendered + '</span>';
           } else {
-            html += '<span class="thai-syl" data-src="' + ch + '" title="' + ch + '">' + thai + '</span>';
+            html += '<span class="thai-syl" data-src="' + ch + '" title="' + ch + '">' + thaiRendered + '</span>';
           }
         } else if (/[\u4e00-\u9fff]/.test(ch)) {
           html += escapeHtml(ch);
@@ -1816,13 +1819,24 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       const hasLatin = /[a-züêv]/i.test(inputText);
       if (hasLatin || ![...inputText].some(c => getReadings(c))) {
         const full = convertPinyinToThai(inputText);
-        return { html: escapeHtml(full), plain: full };
+        return { html: formatAltMarkers(escapeHtml(full), true), plain: formatAltMarkers(full, false) };
       }
       return { html, plain };
     }
 
     function escapeHtml(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /** Turn U+E000…U+E001 alt markers into gray span (HTML) or normal parentheses (plain) */
+    function formatAltMarkers(s, asHtml) {
+      if (!s) return s;
+      if (asHtml) {
+        return String(s)
+          .replace(/\uE000/g, '<span class="thai-alt">(')
+          .replace(/\uE001/g, ')</span>');
+      }
+      return String(s).replace(/\uE000/g, '(').replace(/\uE001/g, ')');
     }
 
 

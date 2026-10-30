@@ -75,40 +75,56 @@
         }
         .diac-btn:hover { background: #F3E5AB; border-color: #D4AF37; }
         .diac-btn:active { transform: scale(0.95); }
-        /* Input-layer poly markers: color only — never change glyph metrics */
-        #inputHighlight .poly-char {
+        /* contenteditable input — real characters, poly coloring only */
+        #pinyinInput {
+            font-family: "Noto Serif SC", "Plus Jakarta Sans", "Noto Sans Thai", sans-serif;
+            font-size: 1.125rem;
+            line-height: 1.75;
+            letter-spacing: 0;
+            word-spacing: 0;
+            tab-size: 4;
+            padding: 1rem;
+            margin: 0;
+            border: 0;
+            box-sizing: border-box;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: normal;
+            color: #1f2937;
+            outline: none;
+        }
+        #pinyinInput:empty:before {
+            content: attr(data-placeholder);
+            color: #d1d5db;
+            pointer-events: none;
+        }
+        #pinyinInput .poly-char {
             font: inherit;
-            font-size: inherit;
-            line-height: inherit;
-            letter-spacing: inherit;
             padding: 0;
             margin: 0;
             border: 0;
-            border-radius: 0;
             background: transparent;
-            cursor: pointer;
             display: inline;
             vertical-align: baseline;
-            box-decoration-break: clone;
-            -webkit-box-decoration-break: clone;
+            cursor: text;
         }
-        #inputHighlight .poly-char.is-poly {
+        #pinyinInput .poly-char.is-poly {
             color: #1d4ed8;
-            /* underline via shadow so width/height unchanged */
-            text-decoration: underline;
-            text-decoration-color: #93c5fd;
-            text-underline-offset: 2px;
+            text-decoration: none;
+            box-shadow: 0 1.5px 0 0 #93c5fd;
+            cursor: pointer;
         }
-        #inputHighlight .poly-char.is-poly:hover {
+        #pinyinInput .poly-char.is-poly:hover {
             background: rgba(219, 234, 254, 0.5);
         }
-        #inputHighlight .poly-char.is-alt {
+        #pinyinInput .poly-char.is-alt {
             color: #c2410c;
-            text-decoration: underline;
-            text-decoration-color: #fb923c;
-            text-underline-offset: 2px;
+            text-decoration: none;
+            box-shadow: 0 1.5px 0 0 #fb923c;
+            cursor: pointer;
         }
-        #inputHighlight .poly-char.is-alt:hover {
+        #pinyinInput .poly-char.is-alt:hover {
             background: rgba(255, 237, 213, 0.6);
         }
     
@@ -121,35 +137,6 @@
         .poly-popup-btn.active { background: #ea580c; color: #fff; border-color: #c2410c; }
         .poly-popup-btn .font-thai { font-family: "Noto Sans Thai", sans-serif; color: #8B0000; }
         .poly-popup-btn.active .font-thai { color: #fff; }
-    
-        #inputHighlight { pointer-events: none; }
-        #inputHighlight .poly-char { pointer-events: auto; cursor: pointer; }
-        #caretMirror { position: absolute; left: 0; top: 0; visibility: hidden; pointer-events: none; white-space: pre-wrap; word-wrap: break-word; overflow: hidden; }
-    
-        #pinyinInput, #inputHighlight {
-            font-family: "Noto Serif SC", "Plus Jakarta Sans", "Noto Sans Thai", sans-serif;
-            font-size: 1.125rem;
-            line-height: 1.75;
-            letter-spacing: 0;
-            word-spacing: 0;
-            tab-size: 4;
-            padding: 1rem !important;
-            margin: 0 !important;
-            border: 0 !important;
-            box-sizing: border-box;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            word-break: normal;
-        }
-        #inputHighlight {
-            color: #1f2937;
-        }
-        #inputHighlight span {
-            font: inherit;
-            line-height: inherit;
-            letter-spacing: inherit;
-        }
         #thaiSrcTip {
             position: absolute;
             z-index: 30;
@@ -227,9 +214,14 @@
             </span>
             <button id="toggleZhuyinBtn" class="example-btn text-xs bg-china-darkred text-white border border-china-gold hover:bg-china-red px-3 py-1.5 rounded-full shadow-sm"><span data-i18n="zhuyinKb">แป้นจู้อิน</span></button>
             <button id="toggleDiacriticBtn" class="example-btn text-xs bg-china-darkred text-white border border-china-gold hover:bg-china-red px-3 py-1.5 rounded-full shadow-sm"><span data-i18n="toneKb">วรรณยุกต์</span></button>
-            <label class="example-btn text-xs bg-white border border-china-border text-china-darkred px-3 py-1.5 rounded-full shadow-sm cursor-pointer inline-flex items-center gap-1.5 select-none">
-                <input type="checkbox" id="long123Toggle" class="rounded border-china-border text-china-red focus:ring-china-gold">
-                <span data-i18n="long123Label">123성 장음으로 표시</span>
+            <label class="example-btn text-xs bg-white border border-china-border text-china-darkred px-2 py-1 rounded-full shadow-sm cursor-pointer inline-flex items-center gap-1.5 select-none">
+                <span class="text-[10px] text-gray-500 whitespace-nowrap" data-i18n="long123Label">1–3성</span>
+                <select id="long123Mode" class="text-xs border-0 bg-transparent text-china-darkred focus:ring-0 cursor-pointer py-0.5 pr-1">
+                    <option value="short" data-i18n="long123Short">단음</option>
+                    <option value="long" data-i18n="long123Long">장음</option>
+                    <option value="short(long)" data-i18n="long123ShortLong">단음(장음)</option>
+                    <option value="long(short)" data-i18n="long123LongShort">장음(단음)</option>
+                </select>
             </label>
         </div>
 
@@ -347,9 +339,10 @@
                     <button id="clearBtn" class="text-xs text-gray-400 hover:text-china-red transition-colors px-2 py-1 rounded hover:bg-red-50"><span data-i18n="clearAll">ล้าง</span></button>
                 </div>
                 <div class="flex-grow flex flex-col relative" id="inputWrap" style="min-height:0">
-                    <div id="inputHighlight" class="absolute inset-0 overflow-hidden text-lg leading-relaxed font-sans whitespace-pre-wrap break-words pointer-events-none text-gray-800" aria-hidden="true"></div>
-                    <textarea id="pinyinInput" class="relative w-full h-full resize-none border-0 focus:ring-0 text-lg text-transparent caret-china-darkred placeholder-gray-300 font-sans custom-scrollbar bg-transparent focus:outline-none"
-                        placeholder="中国 / zhōngguó / ㄓㄨㄥㄍㄨㄛ" data-i18n-placeholder="inputPlaceholder" autofocus spellcheck="false"></textarea>
+                    <div id="pinyinInput" contenteditable="true" spellcheck="false" autofocus
+                        class="relative w-full h-full overflow-y-auto border-0 focus:ring-0 text-china-ink caret-china-darkred font-serif_sc custom-scrollbar bg-transparent focus:outline-none whitespace-pre-wrap break-words"
+                        data-placeholder="中国 / zhōngguó / ㄓㄨㄥㄍㄨㄛ" data-i18n-placeholder="inputPlaceholder"
+                        style="font-size:1.125rem; line-height:1.75; padding:1rem; min-height:100%;"></div>
                     <div id="polyPopup" class="hidden absolute z-20 bg-white border border-china-border rounded-lg shadow-lg p-2 flex flex-wrap gap-1 max-w-xs"></div>
                 </div>
                 <div class="bg-stone-50 border-t border-gray-100 px-4 py-2 text-xs text-gray-400 flex justify-between items-center">
@@ -514,29 +507,40 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     'йоң': { short: '◌ฺยง' }
   };
 
-  // When true: tones 1–3 use long form (⁽¹²³⁾) if available
-  // Tone 4 always uses short form (⁴⁺¹²³)
-  let useLongFor123 = false;
+  // Mode for tones 1–3 when both short & long forms exist:
+  //   'short' | 'long' | 'short(long)' | 'long(short)'
+  // Tone 4 always uses short form. Tone 5 uses neutral if available.
+  let long123Mode = 'short';
 
   function pickRimeForm(entry, tone, initial, cls, finalKey) {
     if (!entry) return null;
     // neutral / light tone (경성 / เสียงเบา) — tone 5 only
-    if (tone === 5 && entry.neutral) return entry.neutral;
+    if (tone === 5 && entry.neutral) return { main: entry.neutral };
     // o after b/p/m → ◌ัว
     if (entry.afterLabial && (initial === 'б' || initial === 'п' || initial === 'м')) {
-      return entry.afterLabial;
+      return { main: entry.afterLabial };
     }
     // high-class special forms for ü-series (ü üe üan ün), including ย-series onset
-    // ย 계열 고자음 also takes ห-series rime (◌ฺหวี, ◌ฺเหฺว, …)
     if (cls === 'high' && entry.high) {
       const ueSeries = (finalKey === 'ү' || finalKey === 'ҩє' || finalKey === 'ҩан' || finalKey === 'үн');
-      if (ueSeries || (initial !== 'ҩ' && initial !== 'й')) return entry.high;
+      if (ueSeries || (initial !== 'ҩ' && initial !== 'й')) return { main: entry.high };
     }
-    // Dual-form rule (user table):
-    //  - tone 4 → always short (⁴⁺¹²³)
-    //  - tones 1–3 → short by default; long only if useLongFor123 switch is ON
-    if (tone >= 1 && tone <= 3 && useLongFor123 && entry.long) return entry.long;
-    return entry.short || entry.long || null;
+    // Tone 4 → always short
+    if (tone === 4) return { main: entry.short || entry.long || null };
+
+    // Tones 1–3: apply long123Mode when both forms exist
+    if (tone >= 1 && tone <= 3) {
+      const s = entry.short || null;
+      const l = entry.long || null;
+      if (s && l) {
+        if (long123Mode === 'long') return { main: l };
+        if (long123Mode === 'short(long)') return { main: s, alt: l };
+        if (long123Mode === 'long(short)') return { main: l, alt: s };
+        return { main: s }; // 'short'
+      }
+      return { main: s || l || null };
+    }
+    return { main: entry.short || entry.long || null };
   }
 
   const COMBINING_TONES = { '\u0304': 1, '\u0301': 2, '\u030C': 3, '\u0300': 4 };
@@ -674,7 +678,9 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     let thaiCons = consInfo[cls] || consInfo.low || consInfo.mid || 'อ';
 
     const rimeEntry = RIMES[final];
-    let rime = pickRimeForm(rimeEntry, tone, initial, cls, final);
+    let picked = pickRimeForm(rimeEntry, tone, initial, cls, final);
+    let rime = (picked && picked.main) || null;
+    let rimeAlt = (picked && picked.alt) || null;
     if (!rime || rime === '.') {
       if (!final) rime = '◌';
       else if (final.startsWith('ў')) rime = '◌ัว';
@@ -682,6 +688,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       else if (final.includes('ң')) rime = '◌ง';
       else if (final.includes('н')) rime = '◌น';
       else rime = '◌';
+      rimeAlt = null;
     }
 
     // High-class rime already embeds ฺห / ฺหว / ห — drop leading ห from consonant
@@ -760,7 +767,37 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       }
     }
 
+    // Strip accidental parens/dots from a single form (alt is appended later)
     result = result.replace(/[()]/g, '').replace(/\./g, '');
+
+    // If dual form requested (단음(장음) / 장음(단음)), build alt and wrap
+    if (rimeAlt) {
+      let altResult;
+      if (rimeAlt.includes('◌')) {
+        if (toneMark && placeToneOnSemi) {
+          altResult = rimeAlt.replace('◌', thaiCons);
+        } else if (toneMark && UPPER_VOWELS.test(rimeAlt)) {
+          const parts = rimeAlt.split('◌');
+          const prefix = parts[0] || '';
+          const suffix = parts[1] || '';
+          const m = suffix.match(/^([ิีึืุูัํ็]+)(.*)$/);
+          if (m) altResult = prefix + thaiCons + m[1] + toneMark + m[2];
+          else altResult = prefix + thaiCons + toneMark + suffix;
+        } else {
+          altResult = rimeAlt.replace('◌', thaiCons + toneMark);
+        }
+      } else {
+        altResult = thaiCons + (placeToneOnSemi ? '' : toneMark) + rimeAlt;
+      }
+      if (toneMark && placeToneOnSemi) {
+        altResult = altResult.replace(/[่้๊๋]/g, '');
+        if (/[ยว]/.test(altResult)) altResult = altResult.replace(/([ยว])/, '$1' + toneMark);
+        else altResult = altResult.replace(thaiCons, thaiCons + toneMark);
+      }
+      altResult = altResult.replace(/[()]/g, '').replace(/\./g, '');
+      altResult = altResult.replace(/([่้๊๋]+)(ฺ+)/g, '$2$1');
+      result = result + '(' + altResult + ')';
+    }
 
     // Tone marks must come AFTER phinthu ฺ (never before)
     result = result.replace(/([่้๊๋]+)(ฺ+)/g, '$2$1');
@@ -987,8 +1024,13 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     getOverrides: () => polyOverrides,
     setDictionary(dict) { HANZI_PINYIN = dict; },
     getDictionary: () => HANZI_PINYIN,
-    setUseLongFor123(v) { useLongFor123 = !!v; },
-    getUseLongFor123: () => useLongFor123
+    setLong123Mode(v) {
+      if (['short','long','short(long)','long(short)'].includes(v)) long123Mode = v;
+    },
+    getLong123Mode: () => long123Mode,
+    // legacy
+    setUseLongFor123(v) { long123Mode = v ? 'long' : 'short'; },
+    getUseLongFor123: () => long123Mode === 'long' || long123Mode === 'long(short)' 
   };
 
 
@@ -1107,8 +1149,11 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleLine1: '※ พยัญชนะกลาง (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ นอกกลุ่มกลาง: ˉ→ต่ำ, ˊ→สูง, ˇ→สูง+่, ˋ→ต่ำ+่',
       ruleLine3: '※ พินอินต่อเนื่อง · NFD · วรรณยุกต์ 4 สั้น; 1–3 ยาวเมื่อเปิดสวิตช์',
-      long123Label: 'แสดงสระยาวสำหรับวรรณยุกต์ 1–3',
-      long123Label: 'สระยาว 1–3',
+      long123Label: 'วรรณยุกต์ 1–3',
+      long123Short: 'สระสั้น',
+      long123Long: 'สระยาว',
+      long123ShortLong: 'สั้น(ยาว)',
+      long123LongShort: 'ยาว(สั้น)',
       inputPlaceholder: 'พิมพ์จีน พินอิน หรือจู้อิน...\nเช่น 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: 'พร้อม',
       statusConverting: 'กำลังแปลง...',
@@ -1143,8 +1188,11 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleLine1: '※ 中辅音 (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ 非中辅音: ˉ→低辅音, ˊ→高辅音, ˇ→高辅音+่, ˋ→低辅音+่',
       ruleLine3: '※ 连续拼音 · NFD · 4声短元音；1–3声仅在开关开启时长元音',
-      long123Label: '1–3声用长元音显示',
-      long123Label: '1–3声长音',
+      long123Label: '1–3声',
+      long123Short: '短音',
+      long123Long: '长音',
+      long123ShortLong: '短音(长音)',
+      long123LongShort: '长音(短音)',
       inputPlaceholder: '输入汉字、拼音或注音...\n例：你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '就绪',
       statusConverting: '转换中...',
@@ -1179,8 +1227,11 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleLine1: '※ 中輔音 (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ 非中輔音: ˉ→低輔音, ˊ→高輔音, ˇ→高輔音+่, ˋ→低輔音+่',
       ruleLine3: '※ 連續拼音 · NFD · 4聲短元音；1–3聲僅在開關開啟時長元音',
-      long123Label: '1–3聲用長元音顯示',
-      long123Label: '1–3聲長音',
+      long123Label: '1–3聲',
+      long123Short: '短音',
+      long123Long: '長音',
+      long123ShortLong: '短音(長音)',
+      long123LongShort: '長音(短音)',
       inputPlaceholder: '輸入漢字、拼音或注音...\n例：你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '就緒',
       statusConverting: '轉換中...',
@@ -1215,8 +1266,11 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleLine1: '※ 중자음(ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ 중자음 외: ˉ→저자음, ˊ→고자음, ˇ→고자음+่, ˋ→저자음+่',
       ruleLine3: '※ 연속 병음 자동 분리 · NFD · 4성은 단모음, 1–3성은 스위치 시 장모음',
-      long123Label: '123성 장음으로 표시',
-      long123Label: '123성 장음',
+      long123Label: '1–3성',
+      long123Short: '단음',
+      long123Long: '장음',
+      long123ShortLong: '단음(장음)',
+      long123LongShort: '장음(단음)',
       inputPlaceholder: '한자·병음·주음을 입력하세요...\n예: 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: '대기 중',
       statusConverting: '변환 중...',
@@ -1251,8 +1305,11 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       ruleLine1: '※ Mid-class (ป ต ก จ): ˉ→ø, ˊ→๋, ˇ→่, ˋ→้',
       ruleLine2: '※ Other classes: ˉ→low, ˊ→high, ˇ→high+่, ˋ→low+่',
       ruleLine3: '※ Continuous pinyin · NFD · tone4 short; 1–3 long only if switch on',
-      long123Label: 'Long vowels for tones 1–3',
-      long123Label: '1–3 long vowel',
+      long123Label: 'Tones 1–3',
+      long123Short: 'Short',
+      long123Long: 'Long',
+      long123ShortLong: 'Short(Long)',
+      long123LongShort: 'Long(Short)',
       inputPlaceholder: 'Enter Chinese, Pinyin, or Zhuyin...\ne.g. 你好 / nǐhǎo / ㄋㄧˇㄏㄠˇ',
       statusReady: 'Ready',
       statusConverting: 'Converting...',
@@ -1352,12 +1409,77 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       }, 2500);
     }
 
-    const inputHighlight = document.getElementById('inputHighlight');
     const polyPopup = document.getElementById('polyPopup');
     let lastPlainThai = '';
+    let isRebuildingInput = false; // prevent input loop when we set HTML
 
+    /** Get plain text from contenteditable (preserves newlines) */
+    function getInputText() {
+      if (!pinyinInput) return '';
+      // Prefer innerText which maps <br> / block to newlines
+      let t = pinyinInput.innerText || '';
+      // Normalize Windows newlines and trailing newlines that browsers add
+      t = t.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+      return t;
+    }
+
+    /** Save selection as character offsets inside the contenteditable */
+    function saveSelection() {
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || !pinyinInput.contains(sel.anchorNode)) {
+        return { start: 0, end: 0 };
+      }
+      const range = sel.getRangeAt(0);
+      const pre = range.cloneRange();
+      pre.selectNodeContents(pinyinInput);
+      pre.setEnd(range.startContainer, range.startOffset);
+      const start = pre.toString().length;
+      const end = start + range.toString().length;
+      return { start, end };
+    }
+
+    /** Restore selection by character offsets */
+    function restoreSelection(start, end) {
+      if (!pinyinInput) return;
+      const sel = window.getSelection();
+      if (!sel) return;
+      let charIdx = 0;
+      const walker = document.createTreeWalker(pinyinInput, NodeFilter.SHOW_TEXT, null);
+      let startNode = null, startOff = 0, endNode = null, endOff = 0;
+      let node;
+      while ((node = walker.nextNode())) {
+        const len = node.nodeValue.length;
+        if (startNode === null && charIdx + len >= start) {
+          startNode = node;
+          startOff = start - charIdx;
+        }
+        if (endNode === null && charIdx + len >= end) {
+          endNode = node;
+          endOff = end - charIdx;
+          break;
+        }
+        charIdx += len;
+      }
+      if (!startNode) {
+        // fallback: end of content
+        sel.selectAllChildren(pinyinInput);
+        sel.collapseToEnd();
+        return;
+      }
+      if (!endNode) { endNode = startNode; endOff = startOff; }
+      try {
+        const range = document.createRange();
+        range.setStart(startNode, Math.min(startOff, startNode.nodeValue.length));
+        range.setEnd(endNode, Math.min(endOff, endNode.nodeValue.length));
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (_) {}
+    }
+
+    /** Rebuild the contenteditable HTML with poly spans, preserving selection */
     function updateInputHighlight(text) {
-      if (!inputHighlight) return;
+      if (!pinyinInput) return;
+      const sel = saveSelection();
       let html = '';
       for (let i = 0; i < text.length; i++) {
         const ch = text[i];
@@ -1370,18 +1492,15 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
           const title = readings.map(formatReading).join(' / ');
           html += '<span class="' + cls + '" data-poly-ch="' + ch + '" data-poly-idx="' + i + '" title="' + title + '">' + esc + '</span>';
         } else {
-          // wrap every glyph the same way so metrics stay uniform
           html += '<span class="poly-char">' + esc + '</span>';
         }
       }
-      inputHighlight.innerHTML = html || '';
+      isRebuildingInput = true;
+      pinyinInput.innerHTML = html || '';
+      isRebuildingInput = false;
+      restoreSelection(sel.start, sel.end);
     }
 
-    if (inputHighlight && !inputHighlight._polyBound) {
-      inputHighlight._polyBound = true;
-      inputHighlight.style.pointerEvents = 'none';
-      // Clicks go to textarea; we intercept mousedown on textarea and detect poly char under cursor
-    }
 
 
     let polyPopupState = { ch: null, idx: 0, readings: [] };
@@ -1421,61 +1540,11 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
 
     function getCharOffsetInTextarea(charIndex) {
-      // Mirror the textarea to measure the pixel position of a character
-      const ta = pinyinInput;
-      const parent = ta.parentElement;
-      let mirror = parent.querySelector('#caretMirror');
-      if (!mirror) {
-        mirror = document.createElement('div');
-        mirror.id = 'caretMirror';
-        mirror.setAttribute('aria-hidden', 'true');
-        parent.appendChild(mirror);
-      }
-      const cs = window.getComputedStyle(ta);
-      // Align mirror with the textarea box inside the parent
-      const top = ta.offsetTop;
-      const left = ta.offsetLeft;
-      mirror.style.cssText = [
-        'position:absolute', 'visibility:hidden', 'pointer-events:none',
-        'white-space:pre-wrap', 'word-wrap:break-word', 'overflow:hidden',
-        'top:' + top + 'px', 'left:' + left + 'px',
-        'width:' + ta.clientWidth + 'px',
-        'height:' + ta.clientHeight + 'px',
-        'margin:0',
-        'padding:' + cs.paddingTop + ' ' + cs.paddingRight + ' ' + cs.paddingBottom + ' ' + cs.paddingLeft,
-        'border-width:' + cs.borderTopWidth + ' ' + cs.borderRightWidth + ' ' + cs.borderBottomWidth + ' ' + cs.borderLeftWidth,
-        'border-style:solid', 'border-color:transparent',
-        'font-family:' + cs.fontFamily,
-        'font-size:' + cs.fontSize,
-        'font-weight:' + cs.fontWeight,
-        'font-style:' + cs.fontStyle,
-        'letter-spacing:' + cs.letterSpacing,
-        'line-height:' + cs.lineHeight,
-        'text-transform:' + cs.textTransform,
-        'box-sizing:' + cs.boxSizing,
-        'z-index:-1'
-      ].join(';');
-      const text = ta.value;
-      const before = text.slice(0, charIndex);
-      const ch = text[charIndex] || '';
-      // Use a marker span at the character
-      mirror.innerHTML = '';
-      const pre = document.createTextNode(before);
-      const mark = document.createElement('span');
-      mark.textContent = ch || '|';
-      mirror.appendChild(pre);
-      mirror.appendChild(mark);
-      // account for scroll
-      mirror.scrollTop = ta.scrollTop;
-      mirror.scrollLeft = ta.scrollLeft;
-      const markRect = mark.getBoundingClientRect();
-      const parentRect = parent.getBoundingClientRect();
-      return {
-        left: markRect.left - parentRect.left,
-        top: markRect.top - parentRect.top,
-        width: markRect.width,
-        height: markRect.height || parseFloat(cs.lineHeight) || 24
-      };
+      // Now that input is contenteditable, just return the span's rect
+      if (!pinyinInput) return null;
+      const span = pinyinInput.querySelector('[data-poly-idx="' + charIndex + '"]');
+      if (span) return span.getBoundingClientRect();
+      return null;
     }
 
     function getPolyAnchorRect(charIndex, preferredSource) {
@@ -1484,8 +1553,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       if (preferredSource === 'output' && thaiOutput) {
         tryEls.push(thaiOutput.querySelector('[data-poly-idx="' + charIndex + '"]'));
       }
-      if (inputHighlight) {
-        tryEls.push(inputHighlight.querySelector('[data-poly-idx="' + charIndex + '"]'));
+      if (pinyinInput) {
+        tryEls.push(pinyinInput.querySelector('[data-poly-idx="' + charIndex + '"]'));
       }
       if (thaiOutput) {
         tryEls.push(thaiOutput.querySelector('[data-poly-idx="' + charIndex + '"]'));
@@ -1519,8 +1588,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       if (source === 'output' && thaiOutput) {
         const el = thaiOutput.querySelector('[data-poly-idx="' + idx + '"]');
         if (el) rect = el.getBoundingClientRect();
-      } else if (inputHighlight) {
-        const el = inputHighlight.querySelector('[data-poly-idx="' + idx + '"]');
+      } else if (pinyinInput) {
+        const el = pinyinInput.querySelector('[data-poly-idx="' + idx + '"]');
         if (el) rect = el.getBoundingClientRect();
       }
       if (!rect) {
@@ -1673,59 +1742,33 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
 
 
     if (pinyinInput) {
-      // Click on highlight poly-char spans (accurate position)
-      if (inputHighlight) {
-        inputHighlight.style.pointerEvents = 'auto';
-        inputHighlight.addEventListener('click', (e) => {
-          const span = e.target.closest('[data-poly-ch]');
-          if (!span) return;
+      // Click on a poly span (now the real content) opens the reading picker
+      pinyinInput.addEventListener('click', (e) => {
+        const span = e.target.closest('[data-poly-ch]');
+        if (span) {
           e.preventDefault();
           e.stopPropagation();
           const ch = span.getAttribute('data-poly-ch');
           const idx = parseInt(span.getAttribute('data-poly-idx'), 10);
           showPolyPopupForChar(ch, idx, span.getBoundingClientRect(), 'input');
-          // place caret near that char in textarea
+          // select that character
           try {
-            pinyinInput.focus();
-            pinyinInput.setSelectionRange(idx, idx + 1);
+            const range = document.createRange();
+            range.selectNodeContents(span);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
           } catch (_) {}
-        });
-      }
-
-      pinyinInput.addEventListener('click', (e) => {
-        // If click landed on highlight span, that handler already ran
-        if (e.target !== pinyinInput) return;
-        const pos = pinyinInput.selectionStart;
-        const text = pinyinInput.value;
-        if (pos == null || text.length === 0) return;
-        let idx = Math.max(0, Math.min(pos, text.length - 1));
-        let ch = text[idx];
-        if (pinyinInput.selectionStart !== pinyinInput.selectionEnd) {
-          const sel = text.slice(pinyinInput.selectionStart, pinyinInput.selectionEnd);
-          if ([...sel].length === 1) {
-            ch = sel[0];
-            idx = pinyinInput.selectionStart;
-          }
-        } else if (pos > 0 && pos === text.length) {
-          ch = text[pos - 1];
-          idx = pos - 1;
+          return;
         }
-        const readings = getReadings(ch);
-        if (readings && readings.length > 1) {
-          // Prefer highlight span rect for pixel-accurate placement
-          let anchor = null;
-          if (inputHighlight) {
-            const span = inputHighlight.querySelector('[data-poly-idx="' + idx + '"]');
-            if (span) anchor = span.getBoundingClientRect();
-          }
-          showPolyPopupForChar(ch, idx, anchor, 'input');
-        } else if (polyPopup) {
+        // click on non-poly: close popup
+        if (polyPopup && !polyPopup.contains(e.target)) {
           polyPopup.classList.add('hidden');
           polyPopupState.ch = null;
         }
       });
       document.addEventListener('click', (e) => {
-        if (polyPopup && !polyPopup.contains(e.target) && e.target !== pinyinInput && !e.target.closest('[data-poly-ch]')) {
+        if (polyPopup && !polyPopup.contains(e.target) && !pinyinInput.contains(e.target) && !e.target.closest('[data-poly-ch]')) {
           polyPopup.classList.add('hidden');
           polyPopupState.ch = null;
         }
@@ -1826,30 +1869,38 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
         const idx = parseInt(span.getAttribute('data-poly-idx') || '0', 10);
         showPolyPopupForChar(ch, idx, span.getBoundingClientRect(), 'output');
         // Mark selection in input highlight only (no focus steal)
-        if (pinyinInput && idx >= 0 && idx <= pinyinInput.value.length) {
+        if (pinyinInput && idx >= 0) {
           try {
             const prev = document.activeElement;
-            pinyinInput.setSelectionRange(idx, idx + 1);
+            const span = pinyinInput.querySelector('[data-poly-idx="' + idx + '"]');
+            if (span) {
+              const range = document.createRange();
+              range.selectNodeContents(span);
+              const sel = window.getSelection();
+              sel.removeAllRanges();
+              sel.addRange(range);
+            }
             if (prev && prev !== pinyinInput && typeof prev.focus === 'function') prev.focus();
           } catch (_) {}
         }
       });
     }
 
+    let isComposing = false;
     function handleInput() {
-      const text = pinyinInput.value;
+      if (isRebuildingInput || isComposing) return;
+      const text = getInputText();
       if (inputCharCount) inputCharCount.textContent = `${text.length}`;
       if (!text.trim()) {
         closePolyPopup();
         thaiOutput.textContent = '';
         lastPlainThai = '';
-        if (inputHighlight) inputHighlight.innerHTML = '';
         if (emptyState) emptyState.style.display = 'flex';
         if (statusIndicator) {
           statusIndicator.textContent = t('statusReady');
           statusIndicator.className = 'text-emerald-600 font-medium';
         }
-        if (polyphonePanel) if (polyPopup) polyPopup.classList.add('hidden');
+        if (polyPopup) polyPopup.classList.add('hidden');
         return;
       }
       if (emptyState) emptyState.style.display = 'none';
@@ -1877,31 +1928,34 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     }
 
 
-    const long123Toggle = document.getElementById('long123Toggle');
-    if (long123Toggle) {
-      long123Toggle.addEventListener('change', () => {
-        if (window.ChineseToThai) window.ChineseToThai.setUseLongFor123(long123Toggle.checked);
+    const long123ModeSel = document.getElementById('long123Mode');
+    if (long123ModeSel) {
+      long123ModeSel.addEventListener('change', () => {
+        if (window.ChineseToThai) window.ChineseToThai.setLong123Mode(long123ModeSel.value);
         handleInput();
       });
     }
 
     if (pinyinInput) {
+      pinyinInput.addEventListener('compositionstart', () => { isComposing = true; });
+      pinyinInput.addEventListener('compositionend', () => { isComposing = false; handleInput(); });
       pinyinInput.addEventListener('input', handleInput);
-      pinyinInput.addEventListener('scroll', () => {
-        if (inputHighlight) {
-          inputHighlight.scrollTop = pinyinInput.scrollTop;
-          inputHighlight.scrollLeft = pinyinInput.scrollLeft;
-        }
+      pinyinInput.addEventListener('keyup', (e) => {
+        if (['Backspace','Delete','Enter'].includes(e.key)) handleInput();
       });
-      pinyinInput.addEventListener('change', handleInput);
-      pinyinInput.addEventListener('keyup', handleInput);
+      // Paste as plain text only
+      pinyinInput.addEventListener('paste', (e) => {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text/plain');
+        document.execCommand('insertText', false, text);
+      });
     }
 
 
 
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
-        pinyinInput.value = '';
+        pinyinInput.innerHTML = '';
         handleInput();
         pinyinInput.focus();
       });
@@ -1973,7 +2027,7 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
       btn.addEventListener('click', () => {
         if (btn.id === 'toggleZhuyinBtn' || btn.id === 'toggleDiacriticBtn') return;
         if (!btn.dataset.example) return;
-        pinyinInput.value = btn.dataset.example;
+        pinyinInput.innerText = btn.dataset.example;
         handleInput();
         pinyinInput.focus();
       });
@@ -1988,12 +2042,14 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     const diacriticCloseBtn = document.getElementById('diacriticCloseBtn');
 
     function insertAtCursor(str) {
-      const start = pinyinInput.selectionStart;
-      const end = pinyinInput.selectionEnd;
-      const val = pinyinInput.value;
-      pinyinInput.value = val.slice(0, start) + str + val.slice(end);
-      pinyinInput.selectionStart = pinyinInput.selectionEnd = start + str.length;
       pinyinInput.focus();
+      // Use execCommand for contenteditable (works with IME / selection)
+      try {
+        document.execCommand('insertText', false, str);
+      } catch (_) {
+        // fallback: append
+        pinyinInput.innerText = (pinyinInput.innerText || '') + str;
+      }
       handleInput();
     }
 
@@ -2023,8 +2079,8 @@ window.HANZI_PINYIN_EMBED = {"㐀":["qiū"],"㐁":["tiàn"],"㐄":["kuà"],"㐅"
     });
 
     // demo
-    if (pinyinInput && !pinyinInput.value) {
-      pinyinInput.value = '你好';
+    if (pinyinInput && !getInputText().trim()) {
+      pinyinInput.innerText = '你好';
     }
     if (pinyinInput) handleInput();
   } catch (err) {
